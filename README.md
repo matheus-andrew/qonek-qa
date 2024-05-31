@@ -1,36 +1,53 @@
-# Template testing Junit-Cucumber-Selenium
+# Qonek QA
 
-This code is provided on an "AS-IS” basis without warranty of any kind, either express or implied, including without limitation any implied warranties of condition, uninterrupted use, merchantability, fitness for a particular purpose, or non-infringement. Your tests and testing environments may require you to modify this framework. 
-this template allows you run testing with bdd aproach and selenium for automation, in parallel and diferent browser
+## Description
 
-### Environment Setup
+Automation code to test qonek web service using Cucumber Selenium
 
-- Install [JDK 8](https://www3.ntu.edu.sg/home/ehchua/programming/howto/JDK_Howto.html) 
-- Install [Maven](https://maven.apache.org/install.html) 
-- Install [Chrome](https://www.google.com/intl/es-419/chrome/) / [firefox](https://www.mozilla.org/es-CL/firefox/new/)
+## How to Run
 
-### Running the tests
+### Run sequential in local
+
+Make sure these line are comment in ```pom.xm```
 ```
-$ mvn test
+                <configuration>
+                    <includes>
+                        <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
+<!--                        <include>**/RunCucumberIT.java</include>-->
+                        <!-- UNCOMMENT BELOW TO RUN SEQUENTIAL -->
+                        <include>**/RunCucumberTest.java</include>
+                    </includes>
+                    <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
+<!--                    <parallel>methods</parallel>-->
+<!--                    <threadCount>4</threadCount>-->
+                </configuration>
 ```
+Change ```instance: chrome``` in ```application.properties```
 
-By default the browser is Chrome, also you can add arguments `-Dbrowser=firefox` to run test on firefox
+Then run ```mvn install```
 
- ```
- $ mvn test -Dbrowser=firefox
- ```
+### Run parallel in local
 
+Make sure these line are uncomment in ```pom.xm```
+```
+                <configuration>
+                    <includes>
+                        <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
+                        <include>**/RunCucumberIT.java</include>
+                        <!-- UNCOMMENT BELOW TO RUN SEQUENTIAL -->
+<!--                        <include>**/RunCucumberTest.java</include>-->
+                    </includes>
+                    <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
+                    <parallel>methods</parallel>
+                    <threadCount>4</threadCount>
+                </configuration>
+```
+Change ```instance: chrome``` in ```application.properties```
 
-### Resources
-##### [Cucumber Docs](https://cucumber.io/docs)
+Then run ```mvn install```
 
-##### [Cucumber School Lessons](https://cucumber.io/school#lessons)
+### Run in docker
 
-##### [SeleniumHQ Documentation](http://www.seleniumhq.org/docs/)
+Change ```instance: remote``` in ```application.properties```
 
-##### [Junit Documentation](http://junit.org/javadoc/latest/index.html)
-
-##### [Java Documentation](https://docs.oracle.com/javase/7/docs/api/)
-
-##### [Stack Overflow](http://stackoverflow.com/)
-* A great resource to search for issues not explicitly covered by documentation.
+Then run ```docker-compose -f docker-compose.yml up --build```
