@@ -9,6 +9,6 @@ import org.junit.runner.RunWith;
         plugin = {"pretty", "html:target/cucumber" , "json:target/cucumber.json"},
         glue = {"cucumber.StepDefinition", "cucumber.Page"},
         features = "src/test/resources/cucumber/chatTemplate",
-        tags = "@QA-163"
+        tags = "@Scenario-8"
 )
 public class RunCucumberTest {}

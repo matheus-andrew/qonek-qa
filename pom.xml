@@ -103,13 +103,13 @@
                 <configuration>
                     <includes>
                         <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
-<!--                        <include>**/RunCucumberIT.java</include>-->
+                       <!-- <include>**/RunCucumberIT.java</include> -->
                         <!-- UNCOMMENT BELOW TO RUN SEQUENTIAL -->
                         <include>**/RunCucumberTest.java</include>
                     </includes>
                     <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
-<!--                    <parallel>methods</parallel>-->
-<!--                    <threadCount>4</threadCount>-->
+                   <!-- <parallel>methods</parallel>
+                   <threadCount>4</threadCount> -->
                 </configuration>
             </plugin>
 
