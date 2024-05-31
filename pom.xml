@@ -101,12 +101,15 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
+                    <includes>
                         <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
-<!--                    <parallel>methods</parallel>-->
-<!--                    <threadCount>3</threadCount>-->
-<!--                    <includes>-->
 <!--                        <include>**/RunCucumberIT.java</include>-->
-<!--                    </includes>-->
+                        <!-- UNCOMMENT BELOW TO RUN SEQUENTIAL -->
+                        <include>**/RunCucumberTest.java</include>
+                    </includes>
+                    <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
+<!--                    <parallel>methods</parallel>-->
+<!--                    <threadCount>4</threadCount>-->
                 </configuration>
             </plugin>
 
