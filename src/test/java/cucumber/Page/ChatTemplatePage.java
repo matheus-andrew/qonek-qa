@@ -1,6 +1,7 @@
 package cucumber.Page;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -42,6 +43,8 @@ public class ChatTemplatePage {
     private final String TEMPLATE_TABLE_COLUMNS = "//*[contains(@class, 'MuiTableBody-root')]//td";
     private final String TEMPLATE_TABLE_COLUMNS_EDIT = "//button[@id='chattemplate_page_btn_edit']";
     private final String TEMPLATE_TABLE_EDIT_WITH_TEMPLATE_NAME = "//*[@id='contactlist_bodytable_btn_3_0' and @title='%s']/following-sibling::td//button[@id='chattemplate_page_btn_edit']";
+    private final String TEMPLATE_TABLE_TEMPLATE_NAME = "//*[@id='contactlist_bodytable_btn_3_0']";
+    private final String TEMPLATE_TABLE_TEMPLATE_NAME_WITH_TITLE = "//*[@id='contactlist_bodytable_btn_3_0' and @title='%s']";
     private final String TEMPLATE_TABLE_COLUMNS_DELETE = "//button[@id='chattemplate_page_btn_delete']";
     private final String TEMPLATE_TABLE_COLUMNS_DELETE_CONFIRMATION = "//button[@id='confirmchattemplate_page_confirm_delete_popup_btn_chattemplate_page_confirm_delete']";
     private final String DROPDOWN_LIST_LOAD_EXISTING = "//*[@class='labelOptionTemplate']";
@@ -294,23 +297,23 @@ public class ChatTemplatePage {
             return;
         }
 
-        WebElement a = driver.findElement(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE));
-        Actions b = new Actions(driver);
-        b.scrollToElement(a).build().perform();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(TEMPLATE_TABLE_TEMPLATE_NAME)));
+        List<WebElement> templateName = driver.findElements(By.xpath(TEMPLATE_TABLE_TEMPLATE_NAME));
+        List<WebElement> btnDelete = driver.findElements(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE));
 
-        try {
+        for (int i=templateName.size()-1; i>=0; i--) {
+            Point coordinatesBtnDelete = btnDelete.get(i).getLocation();
+
+            Actions builder = new Actions(driver);
+            builder
+                    .clickAndHold(templateName.get(i))
+                    .moveToLocation(coordinatesBtnDelete.getX() + 50, coordinatesBtnDelete.getY())
+                    .pause(2000)
+                    .build().perform();
+
             wait.until(ExpectedConditions.elementToBeClickable(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE)));
-        } catch (Exception e) {
-            WebElement element = driver.findElement(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE));
-            Actions actions = new Actions(driver);
-            actions.scrollToElement(element).build().perform();
-        }
 
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE)));
-        List<WebElement> element = driver.findElements(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE));
-
-        for (int i=element.size()-1; i>=0; i--) {
-            element.get(i).click();
+            btnDelete.get(i).click();
             clickEditorialTemplateTableButtonDeleteConfirmation();
         }
     }
@@ -372,6 +375,14 @@ public class ChatTemplatePage {
         wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(TEMPLATE_TABLE_COLUMNS)));
         List<WebElement> element = driver.findElements(By.xpath(TEMPLATE_TABLE_COLUMNS));
         assert element.get(1).getText().equals(templateName);
+
+        Point coordinatesBtnDelete= driver.findElement(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE)).getLocation();
+        Actions builder = new Actions(driver);
+        builder
+                .clickAndHold(element.get(1))
+                .moveToLocation(coordinatesBtnDelete.getX() + 50, coordinatesBtnDelete.getY())
+                .pause(2000)
+                .build().perform();
 
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(TEMPLATE_TABLE_COLUMNS_EDIT)));
         WebElement btnEdit = driver.findElement(By.xpath(TEMPLATE_TABLE_COLUMNS_EDIT));
@@ -447,6 +458,16 @@ public class ChatTemplatePage {
     }
 
     public void clickEditButtonOnTemplateName(String text) {
+        Point coordinatesBtnDelete= driver.findElement(By.xpath(TEMPLATE_TABLE_COLUMNS_DELETE)).getLocation();
+        String xpath2 = String.format(TEMPLATE_TABLE_TEMPLATE_NAME_WITH_TITLE, text);
+        WebElement templateName = driver.findElement(By.xpath(xpath2));
+        Actions builder = new Actions(driver);
+        builder
+                .clickAndHold(templateName)
+                .moveToLocation(coordinatesBtnDelete.getX() + 50, coordinatesBtnDelete.getY())
+                .pause(2000)
+                .build().perform();
+
         String xpath = String.format(TEMPLATE_TABLE_EDIT_WITH_TEMPLATE_NAME, text);
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
         WebElement element = driver.findElement(By.xpath(xpath));
