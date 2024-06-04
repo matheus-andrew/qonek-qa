@@ -8,7 +8,7 @@ Automation code to test qonek web service using Cucumber Selenium
 
 ### Run sequential in local
 
-Make sure these line are comment in ```pom.xm```
+Make sure these line are comment in ```pom.xml```
 ```
                 <configuration>
                     <includes>

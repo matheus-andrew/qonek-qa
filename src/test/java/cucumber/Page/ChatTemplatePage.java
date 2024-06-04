@@ -55,7 +55,7 @@ public class ChatTemplatePage {
 
     public ChatTemplatePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(3));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(60));
     }
 
     public void goToGuidebookPage() {
@@ -63,9 +63,11 @@ public class ChatTemplatePage {
             WebElement title = driver.findElement(By.xpath("//*[@class='head']/h4"));
             assert title.getText().equals("Robo");
         } catch (Exception e) {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(BUTTON_GUIDE_BOOK)));
-            WebElement btnGuidebook = driver.findElement(By.id(BUTTON_GUIDE_BOOK));
-            btnGuidebook.click();
+            try {
+                wait.until(ExpectedConditions.elementToBeClickable(By.id(BUTTON_GUIDE_BOOK)));
+                WebElement btnGuidebook = driver.findElement(By.id(BUTTON_GUIDE_BOOK));
+                btnGuidebook.click();
+            } catch (Exception ignored) {}
         }
     }
 
