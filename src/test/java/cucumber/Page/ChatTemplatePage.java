@@ -59,10 +59,14 @@ public class ChatTemplatePage {
     }
 
     public void goToGuidebookPage() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(BUTTON_GUIDE_BOOK)));
-        WebElement btnGuidebook = driver.findElement(By.id(BUTTON_GUIDE_BOOK));
-
-        btnGuidebook.click();
+        try {
+            WebElement title = driver.findElement(By.xpath("//*[@class='head']/h4"));
+            assert title.getText().equals("Robo");
+        } catch (Exception e) {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(BUTTON_GUIDE_BOOK)));
+            WebElement btnGuidebook = driver.findElement(By.id(BUTTON_GUIDE_BOOK));
+            btnGuidebook.click();
+        }
     }
 
     public void clickCreateNewTemplate() {
