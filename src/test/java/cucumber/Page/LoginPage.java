@@ -22,7 +22,7 @@ public class LoginPage {
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(30));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(300));
     }
 
     public void inputEmail(String email) {

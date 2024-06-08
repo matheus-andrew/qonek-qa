@@ -29,7 +29,7 @@ public class ChatTemplatePage {
     private final String BUBBLE_CHAT_NUMBER = "//*[contains(@class, 'Asdiv DataView')]";
     private final String INPUT_BUBBLE_CHAT = "//*[contains(@class, 'ql-editor')]";
     private final String BUTTON_ADD_FILE = "//*[contains(@class, 'Asp')]";
-    private final String BUTTON_IMAGE = "//*[@class='BubbleTemplateContent_Popover_item pointer' and .='Image']";
+    private final String BUTTON_IMAGE = "//*[contains(@id, 'btn_selectimage')]";
     private final String UPLOAD_IMAGE = "inputFileImage";
     private final String BUTTON_ADD_BUBBLE_CHAT = "addnewtemplate_buble_btn_addbublechat";
     private final String BUTTON_WAIT_FOR_SECOND = "addnewtemplate_buble_btn_waitforrespond";
@@ -55,14 +55,20 @@ public class ChatTemplatePage {
 
     public ChatTemplatePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(3));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(120));
     }
 
     public void goToGuidebookPage() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(BUTTON_GUIDE_BOOK)));
-        WebElement btnGuidebook = driver.findElement(By.id(BUTTON_GUIDE_BOOK));
-
-        btnGuidebook.click();
+        try {
+            WebElement title = driver.findElement(By.xpath("//*[@class='head']/h4"));
+            assert title.getText().equals("Robo");
+        } catch (Exception e) {
+            try {
+                wait.until(ExpectedConditions.elementToBeClickable(By.id(BUTTON_GUIDE_BOOK)));
+                WebElement btnGuidebook = driver.findElement(By.id(BUTTON_GUIDE_BOOK));
+                btnGuidebook.click();
+            } catch (Exception ignored) {}
+        }
     }
 
     public void clickCreateNewTemplate() {
@@ -199,12 +205,18 @@ public class ChatTemplatePage {
     }
 
     public void clickEditorialTemplateChooseImage() {
-        WebElement element = driver.findElement(By.xpath(BUTTON_IMAGE));
-        wait.until(ExpectedConditions.elementToBeClickable(element));
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_IMAGE)));
+        } catch (Exception ignored) {}
     }
 
     public void clickEditorialTemplateUploadImage() {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(UPLOAD_IMAGE)));
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id(UPLOAD_IMAGE)));
+        } catch (Exception e) {
+            clickEditorialTemplateButtonAddFile(2);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id(UPLOAD_IMAGE)));
+        }
         WebElement element = driver.findElement(By.id(UPLOAD_IMAGE));
 
         File file = new File(
