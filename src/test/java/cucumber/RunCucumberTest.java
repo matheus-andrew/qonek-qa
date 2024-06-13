@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         plugin = {"pretty", "html:target/cucumber.html" , "json:target/cucumber.json"},
         glue = {"cucumber.StepDefinition", "cucumber.Page"},
-        features = "src/test/resources/cucumber/chatTemplate",
+        features = "src/test/resources/cucumber/getTexting",
         monochrome = true,
-        tags = "@Feature"
+        tags = "@Scenario-30"
 )
 public class RunCucumberTest {}
