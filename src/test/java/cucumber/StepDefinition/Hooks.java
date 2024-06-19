@@ -25,7 +25,8 @@ public class Hooks {
 
         CreateDriver.getInstance().setDriver(instance);
         driver = CreateDriver.getInstance().getDriver();
-//        driver.manage().window().maximize();
+        driver.manage().window().maximize();
+//        driver.manage().deleteAllCookies();
     }
 
     @After

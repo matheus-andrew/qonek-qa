@@ -14,8 +14,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ChatPage {
-
-
     private final String BUTTON_INBOX = "navmenu_navbtn_inbox";
     private final String BUTTON_CONTACT = "navmenu_navbtn_contact";
     private final String BUTTON_SETTING = "navmenu_navbtn_setting";
@@ -42,6 +40,9 @@ public class ChatPage {
     private final String FILTER_USERNAME_SELECTED = "//*[@id='chatbody_editchattabs_select_username-option-0']";
     private final String FILTER_BUTTON_APPLY = "//*[@id='chatsheader_filterchat_btn_applyfilter']";
 
+    private final String SIDEBAR_UNANSWERED_CHAT_BUTTON = "//*[@id='sidebarchatnotification_btn_unansweredchat']";
+    private final String SIDEBAR_UNANSWERED_CHAT_PANEL = "//*[@class='SidebarChat debug']";
+
     private final String CHAT_TABS_SESSION = "//*[@id='chatbody_chattabs_btn_%s']";
     private final String EDIT_CHAT_TABS_SESSION = "//*[@id='chatbody_editchattabs_btn_%s']";
     private final String EDIT_CHAT_TABS_BUTTON_SAVE = "//*[@id='chatbody_editchattabs_btn_saveedit']";
@@ -63,6 +64,17 @@ public class ChatPage {
     private final String CHAT_USER_TAB_NOTES_TOGGLE_IMPORTANT = "//*[@id='chatbody_chatuser_btn_switchimportant']";
     private final String CHAT_USER_TAB_ADD_NOTE = "//*[@id='note']";
     private final String CHAT_USER_TAB_BUTTON_EDIT_INFO_CONTACT = "//*[@id='chatbody_chatuser_btn_edit']";
+    private final String CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY = "//*[@id='chatbody_chatuser_btn_openchathistory']";
+
+    private final String CHATROOM_HISTORY_TAB = "//*[@class='ChatUserHistory']";
+    private final String CHATROOM_HISTORY_TAB_INPUT_SEARCH = "//*[@class='ChatUserHistory_Search']";
+    private final String CHATROOM_HISTORY_TAB_BUTTON_FILTER = "//*[@id='chatbody_chatuser_chathistory_btn_filter']";
+    private final String CHATROOM_HISTORY_TAB_BUTTON_SORT = "//*[@id='chatbody_chatuser_chathistory_btn_sort']";
+    private final String CHATROOM_HISTORY_TAB_BOX_SESSION = "//*[@class='Asdiv HistoryItem ']";
+    private final String CHATROOM_HISTORY_TAB_BOX_SESSION_POPUP = "//*[@class='DetailChatSession']";
+    private final String CHATROOM_HISTORY_TAB_FILTER_APPLY = "//*[@id='chatbody_chatuser_chathistory_btn_applyfilter']";
+    private final String CHATROOM_HISTORY_TAB_CLOSE_FILTER = "//*[@id='chatbody_chatuser_chathistory_btn_closefilter']";
+    private final String CHATROOM_HISTORY_TAB_BUTTON_BACK = "//*[@id='chatbody_chatuser_chathistory_btn_close']/*[local-name()='path']";
 
     private final String EDIT_INFO_CONTACT_TAB_HEADER = "//*[@class='ChatUserEdit_Header']";
     private final String EDIT_INFO_CONTACT_TAB_CONTACT_NAME = "//*[@id='chatbody_chatuser_textinput_name']";
@@ -103,6 +115,7 @@ public class ChatPage {
     private final String BTN_ATTACH_PLUS_ICON = "//*[@class='imgPreview']//div[@class='left']//button[2]";
     private final String CONTACT_LIST_TABLE_CONTACT_NUMBER = "//*[contains(@id,'btn_edit_nowa')]";
     private final String CONTACT_LIST_TABLE_CONTACT_NAME = "//*[contains(@id,'btn_editname')]";
+
 
     private WebDriver driver;
     private WebDriverWait wait;
@@ -973,5 +986,329 @@ public class ChatPage {
         element.click();
 
         new Actions(driver).pause(2000).perform();
+    }
+
+    public void clickButtonDeleteChatTabs() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHAT_TABS_NEW_TABS_DROPDOWN_DELETE)));
+        WebElement element = driver.findElement(By.xpath(CHAT_TABS_NEW_TABS_DROPDOWN_DELETE));
+        element.click();
+
+        new Actions(driver).pause(2000).perform();
+    }
+
+    public void validateOnChatTabsWillNoLongerShowTab(String text) {
+        try {
+            new WebDriverWait(this.driver, Duration.ofSeconds(3))
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(CHAT_TABS_NEW_TABS)));
+            List<WebElement> elements = driver.findElements(By.xpath(CHAT_TABS_NEW_TABS));
+            assert elements.stream().noneMatch(f -> f.getText().equals(text));
+        }catch (Exception ignored) {}
+    }
+
+    public void clickButtonChatroomHistory() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY)));
+        WebElement element = driver.findElement(By.xpath(CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY));
+        element.click();
+
+        new Actions(driver).pause(2000).perform();
+    }
+
+    public void validateChatroomHistoryWillBeOpened() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB)));
+    }
+
+    public void validateChatroomHistoryHaveInputSearchButtonFilterAndButtonSortByDate() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_INPUT_SEARCH)));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_FILTER)));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_SORT)));
+    }
+
+    public void validateChatroomHistoryHaveBoxChatSessionIDWithStatus(String text) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_BOX_SESSION)));
+        List<WebElement> elements = driver.findElements(By.xpath(CHATROOM_HISTORY_TAB_BOX_SESSION));
+
+        boolean done = false;
+        for (WebElement e : elements) {
+            String id = e.getAttribute("id");
+            WebElement element = driver.findElement(By.xpath(String.format("//*[@id='%s']//button", id)));
+
+            if (element.getText().equals(text)) {
+                done = true;
+                break;
+            }
+            new Actions(driver).pause(500).perform();
+        }
+        assert done;
+    }
+
+    public void clickBoxChatSessionIDWithStatus(String text) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_BOX_SESSION)));
+        List<WebElement> elements = driver.findElements(By.xpath(CHATROOM_HISTORY_TAB_BOX_SESSION));
+
+        for (WebElement e : elements) {
+            String id = e.getAttribute("id");
+            WebElement element = driver.findElement(By.xpath(String.format("//*[@id='%s']//button", id)));
+
+            if (element.getText().equals(text)) {
+                element.click();
+                break;
+            }
+            new Actions(driver).pause(500).perform();
+        }
+    }
+
+    public void validateChatroomSessionHistoryWillBeOpened() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_BOX_SESSION_POPUP)));
+    }
+
+    public void validateWillShowsPopUpChatSessionID(String text) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@class='Session']")));
+        WebElement element = driver.findElement(By.xpath("//*[@class='Session']"));
+        assert element.getText().equals(text);
+    }
+
+    public void validateChatroomSessionHistoryHaveInformation(List<Map<String, String>> list) {
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//*[@class='Information']/div")));
+        List<WebElement> elements = driver.findElements(By.xpath("//*[@class='Information']/div"));
+
+        for (int i=1; i<=elements.size(); i++) {
+            List<WebElement> element = driver.findElements(By.xpath("//*[@class='Information']/div["+i+"]//p"));
+            String text = element.get(0).getText().replace("\n", "");
+
+            WebElement key = driver.findElement(By.xpath("//*[@class='Information']/div["+i+"]//div[@class='Left']"));
+
+            if (list.get(0).get(key.getText()).contains("yyyy")) {
+                assert Utils.validateDate(text, list.get(0).get(key.getText())) : "actual: " + text + " expected: " + list.get(0).get(key.getText());
+            } else {
+                assert text.equals(list.get(0).get(key.getText())) : "actual: " + text + " expected: " + list.get(0).get(key.getText());
+            }
+
+        }
+    }
+
+    public void clickButtonSortByDate() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_SORT)));
+        WebElement element = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_SORT));
+        element.click();
+    }
+
+    public void validateChatroomHistoryWillBeSortedByDate() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_SORT + "/img")));
+        WebElement element = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_SORT + "/img"));
+        assert element.getAttribute("src").contains("sort-on") : "actual: " + element.getAttribute("src") + " expected: sort-on";
+    }
+
+    public void clickButtonFilterOnChatroomHistory() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_FILTER)));
+        WebElement element = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_FILTER + "/*[local-name()='svg']/*[local-name()='path'][1]"));
+
+        new Actions(driver)
+                .moveToElement(element)
+                .click()
+                .pause(2000)
+                .build().perform();
+    }
+
+    public void tickSessionOnChatroomHistory(List<String> textArray) {
+        List<String> sessions = new ArrayList<>(Arrays.asList("closed_session", "expired_session", "expired_pending_session", "expired_unanswered_session"));
+        textArray = textArray.stream()
+                .map(String::toLowerCase)
+                .map(s -> s.replace(" ", "_"))
+                .map(s -> s + "_session")
+                .collect(Collectors.toList());
+
+        for (String s: sessions) {
+            String xpath = String.format("//*[@id='%s']", s);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+            WebElement checkbox = driver.findElement(By.xpath(xpath));
+
+            if (textArray.stream().anyMatch(f -> f.equals(s))) {
+                if (!checkbox.isSelected()) {
+                    checkbox.click();
+                }
+            } else {
+                if (checkbox.isSelected()) {
+                    checkbox.click();
+                }
+            }
+        }
+
+    }
+
+    public void clickButtonApplyFilterOnChatroomHistory() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHATROOM_HISTORY_TAB_FILTER_APPLY)));
+        WebElement element = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_FILTER_APPLY));
+        element.click();
+
+        WebElement close = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_CLOSE_FILTER + "/*[local-name()='path']"));
+        new Actions(driver)
+                .moveToElement(close)
+                .click()
+                .pause(2000)
+                .build().perform();
+    }
+
+    public void validateChatroomHistoryWillBeFilteredAndShowedFilterResultsWithButtonResetFilter() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@class='FilterResult']//*[@class='Left']")));
+        WebElement l = driver.findElement(By.xpath("//*[@class='FilterResult']//*[@class='Left']"));
+        assert l.getText().contains("Filter results :") : "actual: " + l.getText() + ", expected:Filter results :";
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='chatbody_chatuser_chathistory_btn_reset_filter']")));
+        WebElement r = driver.findElement(By.xpath("//*[@id='chatbody_chatuser_chathistory_btn_reset_filter']"));
+        assert r.getText().contains("Reset Filter") : "actual: " + r.getText() + ", expected: Reset Filter";
+    }
+
+    public void clickButtonBackOnChatroomHistory() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_BACK)));
+        WebElement element = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_BUTTON_BACK));
+        new Actions(driver)
+                .moveToElement(element)
+                .click()
+                .pause(2000)
+                .build().perform();
+    }
+
+    public void validateChatroomHistoryWillBeClosedAndRedirectToDetailChatSession() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_PROFILE_DETAIL)));
+    }
+
+    public void validateSidebarChatHaveButtonUnansweredChatOnBottomChatboxPanel() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(SIDEBAR_UNANSWERED_CHAT_BUTTON)));
+    }
+
+    public void clickButtonUnansweredChat() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(SIDEBAR_UNANSWERED_CHAT_BUTTON)));
+        WebElement element = driver.findElement(By.xpath(SIDEBAR_UNANSWERED_CHAT_BUTTON));
+        element.click();
+    }
+
+    public void validateUnansweredChatPanelWillBeShown() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(SIDEBAR_UNANSWERED_CHAT_PANEL)));
+    }
+
+    public void validateAllChatroomWillOnlyShownUnansweredChat() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@class='AvatarContainer']/img")));
+        List<WebElement> elements = driver.findElements(By.xpath("//*[@class='AvatarContainer']/img"));
+
+        for (WebElement e : elements) {
+            assert e.getAttribute("class").contains("avatar-border-danger") : "actual: " + e.getAttribute("class") + " expected: avatar-border-danger";
+        }
+    }
+
+    public void clickButtonDeleteOnTopLeftAreaChat() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='chatbody_chatcontent_btn_deletechat']")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='chatbody_chatcontent_btn_deletechat']"));
+        element.click();
+    }
+
+    public void clickButtonYesOnConfirmationPopUp() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='deletechat_popup_btn_confirmdelete']")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='deletechat_popup_btn_confirmdelete']"));
+        element.click();
+    }
+
+    public void validateChatroomWillBeDeletedFromChatbox() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[@class='Warn']")));
+        WebElement element = driver.findElement(By.xpath("//p[@class='Warn']"));
+        assert element.getText().contains("Deleted") : "actual: " + element.getText() + " expected: Has Been Deleted";
+    }
+
+    public void searchNewChat(String chatTo, String chatFrom) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='chatsheader_textinput_searchchat']")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='chatsheader_textinput_searchchat']"));
+        element.sendKeys(chatTo);
+
+        new Actions(driver).pause(3000).perform();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@class='SidebarChat_Profile']")));
+        WebElement profile = driver.findElement(By.xpath("//*[@class='SidebarChat_Profile']"));
+        profile.click();
+
+        new Actions(driver).pause(500).perform();
+
+        String xpath = String.format("//*[@class='name' and .='%s']", chatFrom);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+        WebElement waNumber = driver.findElement(By.xpath(xpath));
+        waNumber.click();
+
+        new Actions(driver).pause(500).perform();
+
+        clickButtonStartChat();
+    }
+
+    public void clickButtonDeleteWhenCheckingContact() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='sidebarchatnotification_btn_delete']")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='sidebarchatnotification_btn_delete']"));
+        element.click();
+    }
+
+    public void clickAndTypeOnFieldInputSearchOnSidebarChatbox(String text) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='chatsheader_textinput_searchchat']")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='chatsheader_textinput_searchchat']"));
+        element.sendKeys(text);
+
+        new Actions(driver).pause(3000).perform();
+    }
+
+    public void validateSearchChatWillBeFilteredIntoPartsIfExist() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@class='LabelChatSidebar_Contact']")));
+    }
+
+    public void clickContactAfterSearch() {
+        String xpath = "//*[@class='LabelChatSidebar_Contact']/parent::div/following-sibling::div[contains(@id,'btn_openchat')]";
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+        WebElement element = driver.findElement(By.xpath(xpath));
+        element.click();
+    }
+
+    public void validateShowPopUpInitiateChatFirst() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@class='InitiateChat']")));
+    }
+
+    public void chooseWhatsAppNumber(String text) {
+        String[] textArray = text.split(" - ");
+
+        String xpath = String.format("//*[@class='name' and .='%s']", textArray[1]);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+        WebElement waNumber = driver.findElement(By.xpath(xpath));
+        waNumber.click();
+
+        new Actions(driver).pause(500).perform();
+    }
+
+    public void clickButtonStartChat() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='chatbody_initiatechat_btn_startchat']")));
+        WebElement startChat = driver.findElement(By.xpath("//*[@id='chatbody_initiatechat_btn_startchat']"));
+        startChat.click();
+
+        new Actions(driver).pause(500).perform();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='chatsheader_btn_clearsearchchat']")));
+        WebElement closeSearch = driver.findElement(By.xpath("//*[@id='chatsheader_btn_clearsearchchat']/*[local-name()='path']"));
+        closeSearch.click();
+
+        new Actions(driver).pause(2000).perform();
+    }
+
+    public void clickIconOpenChatroomOnContact(String text) {
+        String xpath = String.format("//*[contains(@id,'btn_gotochatroom') and contains(@id,'%s')]/div[2]", text);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+        WebElement element = driver.findElement(By.xpath(xpath));
+
+        String xpath1 = String.format("//*[contains(@id,'btn_gotochatroom') and contains(@id,'%s')]//*[local-name()='svg']/*[local-name()='path']", text);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath1)));
+        WebElement element1 = driver.findElement(By.xpath(xpath1));
+
+        new Actions(driver)
+                .scrollToElement(element)
+                .moveToElement(element1)
+                .pause(1000).perform();
+
+        element1.click();
+
+    }
+
+    public void searchChatWillFoundNothing() {
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//*[@class='LabelChatSidebar_Contact']")));
     }
 }

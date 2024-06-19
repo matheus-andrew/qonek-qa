@@ -493,7 +493,7 @@ public class GetTextingSteps {
     @And("Revert back contact Rahmadhany")
     public void revertBackContactRahmadhany() {
         contactListPage = new ContactListPage(driver);
-        contactListPage.clickButtonRahmadhany();
+        contactListPage.revertContactRahmadhany();
 
         userInInboxPage();
         thereIsContactChattingWith("6285259027122 - Rahmadhany", "6282213288475 - Julia");
@@ -607,6 +607,12 @@ public class GetTextingSteps {
         chatPage.clickButtonApplyFilter();
     }
 
+    @And("User click button 'Apply Filter' on Chatroom History")
+    public void userClickButtonApplyFilterOnChatroomHistory() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonApplyFilterOnChatroomHistory();
+    }
+
     @Then("Chatroom on chatbox will be filtered and showed 'Filter Results' with button 'Reset Filter'")
     public void chatroomOnChatboxWillBeFilteredAndShowedFilterResultsWithButtonResetFilter() {
         chatPage = new ChatPage(driver);
@@ -661,10 +667,773 @@ public class GetTextingSteps {
         chatPage.clickButtonEditChatTabs();
     }
 
+    @And("User click button Delete chat tabs")
+    public void userClickButtonDeleteChatTabs() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonDeleteChatTabs();
+    }
+
     @And("User click button 'Save Chat Tabs'")
     public void userClickButtonSaveChatTabs() {
         chatPage = new ChatPage(driver);
         chatPage.clickButtonSaveChatTabs();
+    }
+
+
+    @And("On Chat Tabs will no longer show tab {string}")
+    public void onChatTabsWillNoLongerShowTab(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.validateOnChatTabsWillNoLongerShowTab(text);
+    }
+
+    @And("User click button 'Chatroom History' on Detail Chat Session panel")
+    public void userClickButtonChatroomHistoryOnDetailChatSessionPanel() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonChatroomHistory();
+    }
+
+    @Then("Chatroom History will be opened")
+    public void chatroomHistoryWillBeOpened() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomHistoryWillBeOpened();
+    }
+
+    @And("Chatroom History have input search, button Filter, and button Sort by Date")
+    public void chatroomHistoryHaveInputSearchButtonFilterAndButtonSortByDate() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomHistoryHaveInputSearchButtonFilterAndButtonSortByDate();
+    }
+
+    @And("Chatroom History have box Chat Session ID with status {string}")
+    public void chatroomHistoryHaveBoxChatSessionIDWithStatus(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomHistoryHaveBoxChatSessionIDWithStatus(text);
+    }
+
+    @When("User click box Chat Session ID with status {string}")
+    public void userClickBoxChatSessionIDWithStatus(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.clickBoxChatSessionIDWithStatus(text);
+    }
+
+    @Then("Chatroom Session History will be opened")
+    public void chatroomSessionHistoryWillBeOpened() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomSessionHistoryWillBeOpened();
+    }
+
+    @And("Will shows pop-up Chat Session ID {string}")
+    public void willShowsPopUpChatSessionID(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.validateWillShowsPopUpChatSessionID(text);
+    }
+
+    @And("Chatroom Session History have information")
+    public void chatroomSessionHistoryHaveInformation(DataTable dataTable) {
+        List<Map<String, String>> list = dataTable.asMaps(String.class,String.class);
+
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomSessionHistoryHaveInformation(list);
+    }
+
+    @And("User click button Sort by Date")
+    public void userClickButtonSortByDate() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonSortByDate();
+    }
+
+    @Then("Chatroom History will be sorted by Date")
+    public void chatroomHistoryWillBeSortedByDate() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomHistoryWillBeSortedByDate();
+    }
+
+    @When("User click button Filter on Chatroom History")
+    public void userClickButtonFilterOnChatroomHistory() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonFilterOnChatroomHistory();
+    }
+
+    @And("User tick session {string} on Chatroom History")
+    public void userTickSessionOnChatroomHistory(String text) {
+        String[] textArray = text.split(", ");
+        List<String> a = new ArrayList<>();
+        Collections.addAll(a, textArray);
+
+        chatPage = new ChatPage(driver);
+        chatPage.tickSessionOnChatroomHistory(a);
+    }
+
+    @Then("Chatroom History will be filtered and showed 'Filter Results' with button 'Reset Filter'")
+    public void chatroomHistoryWillBeFilteredAndShowedFilterResultsWithButtonResetFilter() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomHistoryWillBeFilteredAndShowedFilterResultsWithButtonResetFilter();
+    }
+
+    @When("User click button Back on Chatroom History")
+    public void userClickButtonBackOnChatroomHistory() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonBackOnChatroomHistory();
+    }
+
+    @Then("Chatroom History will be closed and redirect to Detail Chat Session")
+    public void chatroomHistoryWillBeClosedAndRedirectToDetailChatSession() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomHistoryWillBeClosedAndRedirectToDetailChatSession();
+    }
+
+    @And("Sidebar chat have button Unanswered Chat on bottom Chatbox panel")
+    public void sidebarChatHaveButtonUnansweredChatOnBottomChatboxPanel() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateSidebarChatHaveButtonUnansweredChatOnBottomChatboxPanel();
+    }
+
+    @When("User click button Unanswered Chat")
+    public void userClickButtonUnansweredChat() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonUnansweredChat();
+    }
+
+    @Then("Unanswered Chat panel will be shown")
+    public void unansweredChatPanelWillBeShown() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateUnansweredChatPanelWillBeShown();
+    }
+
+    @And("All chatroom will only shown Unanswered Chat")
+    public void allChatroomWillOnlyShownUnansweredChat() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateAllChatroomWillOnlyShownUnansweredChat();
+    }
+
+    @When("User click button Delete on top left area chat")
+    public void userClickButtonDeleteOnTopLeftAreaChat() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonDeleteOnTopLeftAreaChat();
+    }
+
+    @And("User click button Yes on confirmation pop-up")
+    public void userClickButtonYesOnConfirmationPopUp() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonYesOnConfirmationPopUp();
+    }
+
+    @Then("Chatroom will be deleted from Chatbox")
+    public void chatroomWillBeDeletedFromChatbox() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateChatroomWillBeDeletedFromChatbox();
+    }
+
+    @And("Start new chat {string}")
+    public void startNewChat(String text) {
+        String[] textArray = text.split(", ");
+        chatPage = new ChatPage(driver);
+        chatPage.searchNewChat(textArray[0], textArray[1]);
+    }
+
+    @And("User click button Delete when checking contact")
+    public void userClickButtonDeleteWhenCheckingContact() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonDeleteWhenCheckingContact();
+    }
+
+    @When("User click button New Contact")
+    public void userClickButtonNewContact() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonNewContact();
+    }
+
+    @Then("Show pop-up Add New Contact")
+    public void showPopUpAddNewContact() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateShowPopUpAddNewContact();
+    }
+
+    @And("Button Save will be grey out")
+    public void buttonSaveWillBeGreyOut() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateButtonSaveWillBeGreyOut();
+    }
+
+    @When("User click and type {string} on field Contact Number")
+    public void userClickAndTypeOnFieldContactNumber(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickAndTypeOnFieldContactNumber(text);
+    }
+
+    @When("User click and type {string} on field Contact Name")
+    public void userClickAndTypeOnFieldContactName(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickAndTypeOnFieldContactName(text);
+    }
+
+    @And("User click button Save")
+    public void userClickButtonSave() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSave();
+    }
+
+    @When("User click button Edit on contact {string}")
+    public void userClickButtonEditOnContact(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonEditOnContact(text);
+    }
+
+    @Then("Show pop-up Edited Contact on Edit Contact")
+    public void showPopUpEditedContactOnEditContact() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateShowPopUpEditContact();
+    }
+
+    @When("User click field Contact Number")
+    public void userClickFieldContactNumber() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickFieldContactNumber();
+    }
+
+    @Then("Show warning changed contact number")
+    public void showWarningChangedContactNumber() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateShowWarningChangedContactNumber();
+    }
+
+    @When("User click button Yes on warning changed contact number")
+    public void userClickButtonYesOnWarningChangedContactNumber() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonYesOnWarningChangedContactNumber();
+    }
+
+    @And("User click button Save on Edit Contact")
+    public void userClickButtonSaveOnEditContact() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSaveOnEditContact();
+    }
+
+    @When("User click and type {string} on field input search on sidebar chatbox")
+    public void userClickAndTypeOnFieldInputSearchOnSidebarChatbox(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.clickAndTypeOnFieldInputSearchOnSidebarChatbox(text);
+    }
+
+    @Then("Search chat will be filtered into 3 parts if exist")
+    public void searchChatWillBeFilteredIntoPartsIfExist() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateSearchChatWillBeFilteredIntoPartsIfExist();
+    }
+
+    @When("User click contact after search")
+    public void userClickContactAfterSearch() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickContactAfterSearch();
+    }
+
+    @Then("Show pop-up Initiate Chat First")
+    public void showPopUpInitiateChatFirst() {
+        chatPage = new ChatPage(driver);
+        chatPage.validateShowPopUpInitiateChatFirst();
+    }
+
+    @When("User choose WhatsApp Number {string}")
+    public void userChooseWhatsAppNumber(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.chooseWhatsAppNumber(text);
+    }
+
+    @And("User click button Start Chat")
+    public void userClickButtonStartChat() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonStartChat();
+    }
+
+    @And("User click icon Open Chatroom on contact {string}")
+    public void userClickIconOpenChatroomOnContact(String text) {
+        chatPage = new ChatPage(driver);
+        chatPage.clickIconOpenChatroomOnContact(text);
+    }
+
+    @When("User click and changed name {string} into {string}")
+    public void userClickAndChangedNameInto(String from, String to) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickAndChangedNameInto(from, to);
+    }
+
+    @When("User click button Add Bulk")
+    public void userClickButtonAddBulk() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonAddBulk();
+    }
+
+    @And("User choose Import File when Add Bulk")
+    public void userChooseImportFileWhenAddBulk() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.chooseImportFileWhenAddBulk();
+    }
+
+    @And("User upload excel template into pop-up Import File")
+    public void userUploadExcelTemplateIntoPopUpImportFile() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.uploadExcelTemplateIntoPopUpImportFile();
+    }
+
+    @And("User upload excel template 1000 into pop-up Import File")
+    public void userUploadExcelTemplate1000IntoPopUpImportFile() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.uploadExcelTemplate1000IntoPopUpImportFile();
+    }
+
+    @When("User click button Submit")
+    public void userClickButtonSubmit() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSubmit();
+    }
+
+    @And("User choose Sync From WhatsApp when Add Bulk")
+    public void userChooseSyncFromWhatsAppWhenAddBulk() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.chooseSyncFromWhatsAppWhenAddBulk();
+    }
+
+    @When("User click input field Choose WhatsApp Number")
+    public void userClickInputFieldChooseWhatsAppNumber() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickInputFieldChooseWhatsAppNumber();
+    }
+
+    @And("User choose Whatsapp number {string}")
+    public void userChooseWhatsappNumber(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.chooseWhatsappNumber(text);
+    }
+
+    @When("User click button Next")
+    public void userClickButtonNext() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonNext();
+    }
+
+    @Then("Pop-up WhatsApp Sync will continue to second step")
+    public void popUpWhatsAppSyncWillContinueToSecondStep() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validatePopUpWhatsAppSyncWillContinueToSecondStep();
+    }
+
+    @When("User check contact wanted to be added")
+    public void userCheckContactWantedToBeAdded() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.checkFirstContactWantedToBeAdded();
+    }
+
+    @Then("Chosen contact will be added to Contact List table")
+    public void chosenContactWillBeAddedToContactListTable() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateChosenContactWillBeAddedToContactListTable("6282133334531");
+    }
+
+    @And("User upload excel template overwrite into pop-up Import File")
+    public void userUploadExcelTemplateOverwriteIntoPopUpImportFile() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.uploadExcelTemplateOverwriteIntoPopUpImportFile();
+    }
+
+    @Then("Show pop-up Overwrite Data")
+    public void showPopUpOverwriteData() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateShowPopUpOverwriteData();
+    }
+
+    @When("User click button Yes, Overwrite")
+    public void userClickButtonYesOverwrite() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonYesOverwrite();
+    }
+
+    @And("user click contact {string} and changed address {string}")
+    public void userClickContactAndChangedAddress(String contact, String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickContactAndChangedAddress(contact, text);
+    }
+
+    @And("user click contact {string} and changed postal code {string}")
+    public void userClickContactAndChangedPostalCode(String contact, String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickContactAndChangedPostalCode(contact, text);
+    }
+
+    @And("user click contact {string} and changed notes {string}")
+    public void userClickContactAndChangedNotes(String contact, String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickContactAndChangedNotes(contact, text);
+    }
+
+    @When("User click button Skip")
+    public void userClickButtonSkip() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSkip();
+    }
+
+    @When("User click button Export All")
+    public void userClickButtonExportAll() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonExportAll();
+    }
+
+    @Then("Show pop-up Export All Confirmation")
+    public void showPopUpExportAllConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateShowPopUpExportAllConfirmation();
+    }
+
+    @When("User click button Yes, Im Sure on Export All Confirmation")
+    public void userClickButtonYesImSureOnExportAllConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonYesImSureOnExportAllConfirmation();
+    }
+
+    @Then("Contact list will be exported to excel format")
+    public void contactListWillBeExportedToExcelFormat() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.validateContactListWillBeExportedToExcelFormat();
+    }
+
+    @When("User click and type {string} on field input search")
+    public void userClickAndTypeOnFieldInputSearch(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickAndTypeOnFieldInputSearch(text);
+    }
+
+    @And("User click button Search")
+    public void userClickButtonSearch() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSearch();
+    }
+
+    @When("User click icon X on field input search")
+    public void userClickIconXOnFieldInputSearch() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickIconXOnFieldInputSearch();
+    }
+
+    @When("User click icon filter on Contact Name")
+    public void userClickIconFilterOnContactName() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickIconFilterOnContactName();
+    }
+
+    @And("User click Sort A-Z on pop-up filter")
+    public void userClickSortAZOnPopUpFilter() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickSortAZOnPopUpFilter();
+    }
+
+    @And("User click Sort Z-A on pop-up filter")
+    public void userClickSortZAOnPopUpFilter() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickSortZAOnPopUpFilter();
+    }
+
+    @And("User click button Set Filter on pop-up filter")
+    public void userClickButtonSetFilterOnPopUpFilter() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSetFilterOnPopUpFilter();
+    }
+
+    @And("user click button Apply Filter on page Contact List")
+    public void userClickButtonApplyFilterOnPageContactList() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonApplyFilter();
+    }
+
+    @When("User click button Remove Filter")
+    public void userClickButtonRemoveFilter() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonRemoveFilter();
+    }
+
+    @And("User click expand Filter by Condition {string}")
+    public void userClickExpandFilterByCondition(String text) {
+        switch (text) {
+            case "Name":
+                contactListPage = new ContactListPage(driver);
+                contactListPage.clickExpandFilterByConditionName();
+                break;
+            case "Activity":
+                contactListPage = new ContactListPage(driver);
+                contactListPage.clickExpandFilterByConditionActivity();
+                break;
+        }
+    }
+
+    @And("On field Condition choose {string}")
+    public void onFieldConditionChoose(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.onFieldConditionChoose(text);
+    }
+
+    @And("User type {string} on field condition")
+    public void userTypeOnFieldCondition(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userTypeOnFieldCondition(text);
+    }
+
+    @And("User click icon filter {string} on column Checkbox")
+    public void userClickIconFilterOnColumnCheckbox(String text) {
+        String[] textArray = text.split(",");
+
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickIconFilterOnColumnCheckbox(textArray);
+    }
+
+    @When("User click button Contact History on contact {string}")
+    public void userClickButtonContactHistoryOnContact(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonContactHistoryOnContact(text);
+    }
+
+    @Then("User will be redirected to page Contact History")
+    public void userWillBeRedirectedToPageContactHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userWillBeRedirectedToPageContactHistory();
+    }
+
+    @And("Contact History list will shows all history data")
+    public void contactHistoryListWillShowsAllHistoryData(DataTable dataTable) {
+        List<Map<String, String>> list = dataTable.asMaps(String.class,String.class);
+
+        contactListPage = new ContactListPage(driver);
+        contactListPage.contactHistoryListWillShowsAllHistoryData(list);
+    }
+
+    @And("User click button Export History")
+    public void userClickButtonExportHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonExportHistory();
+    }
+
+    @And("User click button Yes, Im Sure on Export History Confirmation")
+    public void userClickButtonYesImSureOnExportHistoryConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonYesImSureOnExportHistoryConfirmation();
+    }
+
+    @Then("History list will be exported to excel format")
+    public void historyListWillBeExportedToExcelFormat() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.historyListWillBeExportedToExcelFormat();
+    }
+
+    @When("User click icon filter Activity on Contact History page")
+    public void userClickIconFilterActivityOnContactHistoryPage() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickIconFilterActivityOnContactHistoryPage();
+    }
+
+    @When("User click button Edit Contact on Detail Contact panel")
+    public void userClickButtonEditContactOnDetailContactPanel() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonEditContactOnDetailContactPanel();
+    }
+
+    @And("User click and type {string} on field Contact Name Contact List Detail")
+    public void userClickAndTypeOnFieldContactNameContactListDetail(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickAndTypeOnFieldContactNameContactListDetail(text);
+    }
+
+    @And("User click and type {string} on field Address Contact List Detail")
+    public void userClickAndTypeOnFieldAddressContactListDetail(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickAndTypeOnFieldAddressContactListDetail(text);
+    }
+
+    @And("User click button Save on Contact List Detail")
+    public void userClickButtonSaveOnContactListDetail() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonSaveOnContactListDetail();
+    }
+
+    @And("User click button Edit Bulk on Contact List Page")
+    public void userClickButtonEditBulkOnContactListPage() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonEditBulkOnContactListPage();
+    }
+
+    @Then("Show pop-up Edit Bulk")
+    public void showPopUpEditBulk() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.showPopUpEditBulk();
+    }
+
+    @When("User click and type {string} on field Country Edit Bulk")
+    public void userClickAndTypeOnFieldCountryEditBulk(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickAndTypeOnFieldCountryEditBulk(text);
+    }
+
+    @And("User click and type {string} on field Province Edit Bulk")
+    public void userClickAndTypeOnFieldProvinceEditBulk(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickAndTypeOnFieldProvinceEditBulk(text);
+    }
+
+    @And("User click on Tag Edit Bulk and choose {string}")
+    public void userClickOnTagEditBulkAndChoose(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickOnTagEditBulkAndChoose(text);
+    }
+
+    @And("User click and type {string} on field Tag Edit Bulk")
+    public void userClickAndTypeOnFieldTagEditBulk(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickAndTypeOnFieldTagEditBulk(text);
+    }
+
+    @And("user click button Save on Edit Bulk")
+    public void userClickButtonSaveOnEditBulk() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonSaveOnEditBulk();
+    }
+
+
+    @Then("User see warn upload more than 1000 data")
+    public void userSeeWarnUploadMoreThanData() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userSeeWarnUploadMoreThanData();
+    }
+
+    @And("User upload excel template 1000 Overwrite into pop-up Import File")
+    public void userUploadExcelTemplate1000OverwriteIntoPopUpImportFile() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userUploadExcelTemplate1000OverwriteIntoPopUpImportFile();
+    }
+
+    @Then("User see pop-up Skip or Overwrite")
+    public void userSeePopUpSkipOrOverwrite() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userSeePopUpSkipOrOverwrite();
+    }
+
+    @And("User upload excel template 20 into pop-up Import File")
+    public void userUploadExcelTemplate20IntoPopUpImportFile() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userUploadExcelTemplate20IntoPopUpImportFile();
+    }
+
+    @When("User click button Next pagination on Contact List")
+    public void userClickButtonNextPaginationOnContactList() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonNextPaginationOnContactList();
+    }
+
+    @Then("User on page {int} of Contact List")
+    public void userOnPageOfContactList(int number) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userOnPageOfContactList(number);
+    }
+
+    @When("User click button Prev pagination on Contact List")
+    public void userClickButtonPrevPaginationOnContactList() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonPrevPaginationOnContactList();
+    }
+
+    @When("User click field data view on pagination and choose {string}")
+    public void userClickFieldDataViewOnPaginationAndChoose(String arg0) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickFieldDataViewOnPaginationAndChoose(arg0);
+    }
+
+    @Then("Table Contact List will only show {int} row data Contact List")
+    public void tableContactListWillOnlyShowRowDataContactList(int number) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.tableContactListWillOnlyShowRowDataContactList(number);
+    }
+
+    @When("User click button Delete on contact {string}")
+    public void userClickButtonDeleteOnContact(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonDeleteOnContact(text);
+    }
+
+    @Then("Show pop-up Delete confirmation")
+    public void showPopUpDeleteConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.showPopUpDeleteConfirmation();
+    }
+
+    @When("User click button Yes, I’m Sure on Delete confirmation")
+    public void userClickButtonYesIMSureOnDeleteConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonYesIMSureOnDeleteConfirmation();
+    }
+
+    @And("user click button Delete Bulk on Contact List page")
+    public void userClickButtonDeleteBulkOnContactListPage() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonDeleteBulkOnContactListPage();
+    }
+
+    @Then("Show pop-up Delete Bulk confirmation")
+    public void showPopUpDeleteBulkConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.showPopUpDeleteBulkConfirmation();
+    }
+
+    @When("User click button Yes, I’m Sure on Delete Bulk confirmation")
+    public void userClickButtonYesIMSureOnDeleteBulkConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonYesIMSureOnDeleteBulkConfirmation();
+    }
+
+    @When("User type {string} on input search Contact History")
+    public void userTypeOnInputSearchContactHistory(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userTypeOnInputSearchContactHistory(text);
+    }
+
+    @Then("Table Contact List History will be filtered with blue highlighted")
+    public void tableContactListHistoryWillBeFilteredWithBlueHighlighted() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.tableContactListHistoryWillBeFilteredWithBlueHighlighted();
+    }
+
+    @When("User click icon X on input search Contact History")
+    public void userClickIconXOnInputSearchContactHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickIconXOnInputSearchContactHistory();
+    }
+
+    @Then("Table Contact List History will be back to normal")
+    public void tableContactListHistoryWillBeBackToNormal() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.tableContactListHistoryWillBeBackToNormal();
+    }
+
+    @When("User click icon filter SessionID on Contact History page")
+    public void userClickIconFilterSessionIDOnContactHistoryPage() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickIconFilterSessionIDOnContactHistoryPage();
+    }
+
+    @And("User click expand Filter by Value {string}")
+    public void userClickExpandFilterByValue(String text) {
+        switch (text) {
+            case "SessionID":
+                contactListPage = new ContactListPage(driver);
+                contactListPage.userClickExpandFilterByValue();
+                break;
+        }
+    }
+
+    @And("On field filter by value tick only one")
+    public void onFieldFilterByValueTickOnlyOne() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.onFieldFilterByValueTickOnlyOne();
+    }
+
+    @Then("Search chat will found nothing")
+    public void searchChatWillFoundNothing() {
+        chatPage = new ChatPage(driver);
+        chatPage.searchChatWillFoundNothing();
     }
 }
 
