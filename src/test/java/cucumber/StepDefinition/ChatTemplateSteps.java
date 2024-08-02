@@ -4,6 +4,7 @@ import cucumber.Page.ChatTemplatePage;
 import cucumber.Page.LoginPage;
 import cucumber.util.CreateDriver;
 import cucumber.util.PropertiesLoader;
+import cucumber.util.Utils;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
@@ -36,9 +37,26 @@ public class ChatTemplateSteps {
         String password = conf.getProperty("password");
         String qonekurl = conf.getProperty("qonekurl");
 
-        driver.get(qonekurl);
+        long startTime = System.currentTimeMillis();
 
         loginPage = new LoginPage(driver);
+        loginPage.goToLoginPage(qonekurl);
+        loginPage.inputEmail(username);
+        loginPage.inputPassword(password);
+        loginPage.clickSignIn();
+        loginPage.validateInHomePage();
+
+        long duration = System.currentTimeMillis() - startTime;
+        System.out.println("Total time needed to login : " + Utils.convertMillisToString(duration));
+    }
+
+    @Given("User already login with account {string} and password {string}")
+    public void userAlreadyLoginWithAccount(String username, String password) throws IOException {
+        Properties conf = PropertiesLoader.loadProperties();
+        String qonekurl = conf.getProperty("qonekurl");
+
+        loginPage = new LoginPage(driver);
+        loginPage.goToLoginPage(qonekurl);
         loginPage.inputEmail(username);
         loginPage.inputPassword(password);
         loginPage.clickSignIn();

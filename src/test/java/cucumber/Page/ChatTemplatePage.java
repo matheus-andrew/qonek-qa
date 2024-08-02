@@ -55,7 +55,7 @@ public class ChatTemplatePage {
 
     public ChatTemplatePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(120));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(30));
     }
 
     public void goToGuidebookPage() {

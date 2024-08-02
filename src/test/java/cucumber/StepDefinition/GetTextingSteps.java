@@ -243,7 +243,7 @@ public class GetTextingSteps {
     }
 
     @And("User click and type {string} on field notes")
-    public void userClickAndTypeOnFieldNotes(String text) throws InterruptedException {
+    public void userClickAndTypeOnFieldNotes(String text) {
         chatPage = new ChatPage(driver);
         chatPage.inputNotes(text);
     }
@@ -254,10 +254,10 @@ public class GetTextingSteps {
         chatPage.validateNotesIsAdded(text);
     }
 
-    @When("User click icon info on records")
-    public void userClickIconInfoOnRecords() {
+    @When("User click icon info on records {string}")
+    public void userClickIconInfoOnRecords(String text) {
         chatPage = new ChatPage(driver);
-        chatPage.clickInfoIcon();
+        chatPage.clickInfoIcon(text);
     }
 
     @Then("Show pop-up Added Notes")
@@ -314,7 +314,14 @@ public class GetTextingSteps {
 
     @When("User not send message and no interaction for {int} min")
     public void userNotSendMessageAndNoInteractionForMin(int duration) throws InterruptedException {
+        System.out.println("Start waiting for " + duration + " min..");
         Thread.sleep((long) duration * 62 * 1000);
+    }
+
+    @When("User not send message and no interaction for {int} sec")
+    public void userNotSendMessageAndNoInteractionForSec(int duration) throws InterruptedException {
+        System.out.println("Start waiting for " + duration + " sec..");
+        Thread.sleep((long) duration  * 1000);
     }
 
     @When("User click menu Setting")
@@ -492,17 +499,17 @@ public class GetTextingSteps {
 
     @And("Revert back contact Rahmadhany")
     public void revertBackContactRahmadhany() {
+        userClickMenuContact();
+        userWillBeRedirectedToPageContactList();
+        userClickButtonAddBulk();
+        userChooseImportFileWhenAddBulk();
+
         contactListPage = new ContactListPage(driver);
         contactListPage.revertContactRahmadhany();
 
-        userInInboxPage();
-        thereIsContactChattingWith("6285259027122 - Rahmadhany", "6282213288475 - Julia");
-        userClickButtonEditInfoContactOnDetailChatroomPanel();
-        detailChatroomPanelWillBeChangedToEditInfoContactPanel();
-        userClickFieldAddressAndType("");
-        userClickFieldPostalCodeAndType("");
-        userClickButtonSaveOnEditInfoContactPanel();
-        editInfoContactPanelWillBeChangedToDetailChatroomPanel();
+        userClickButtonSubmit();
+
+//        contactListPage.revertContactRahmadhanyTag();
     }
 
     @When("User click button 'Check' on chatbox sidebar")
@@ -530,10 +537,28 @@ public class GetTextingSteps {
         chatPage.clickButtonTaggingAllSelected();
     }
 
+    @And("User choose 'Closed Session Selected'")
+    public void userChooseClosedSessionSelected() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonClosedSessionAllSelected();
+    }
+
     @Then("Show pop-up Tagging All Selected")
     public void showPopUpTaggingAllSelected() {
         chatPage = new ChatPage(driver);
         chatPage.validatePopUpTaggingAllSelected();
+    }
+
+    @Then("Show pop-up Closed Session Selected")
+    public void showPopUpClosedSessionSelected() {
+        chatPage = new ChatPage(driver);
+        chatPage.validatePopUpClosedSessionSelected();
+    }
+
+    @When("User click button Yes, Sure on confirmation pop-up")
+    public void userClickButtonYesSureOnConfirmationPopUp() {
+        chatPage = new ChatPage(driver);
+        chatPage.clickButtonYesSure();
     }
 
     @When("User click and type {string} on field Search Tag Tagging")
@@ -577,6 +602,10 @@ public class GetTextingSteps {
     public void userClickButtonAddNotes() {
         chatPage = new ChatPage(driver);
         chatPage.clickButtonAddNotes();
+
+        if (chatPage.checkIfThereAlreadyHasNotes()) {
+            chatPage.clickYesRewriteAddNotes();
+        }
     }
 
     @When("User click button 'Filter' on chatbox sidebar")
@@ -939,6 +968,12 @@ public class GetTextingSteps {
         chatPage.chooseWhatsAppNumber(text);
     }
 
+    @And("User choose Whatsapp number first option")
+    public void userChooseWhatsappNumber() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.chooseWhatsAppNumberSyncOption();
+    }
+
     @And("User click button Start Chat")
     public void userClickButtonStartChat() {
         chatPage = new ChatPage(driver);
@@ -985,6 +1020,16 @@ public class GetTextingSteps {
     public void userClickButtonSubmit() {
         contactListPage = new ContactListPage(driver);
         contactListPage.clickButtonSubmit();
+
+        if (contactListPage.checkIfOverwrite()) {
+            contactListPage.clickButtonYesOverwrite();
+        }
+    }
+
+    @When("User click button Submit without Overwrite")
+    public void userClickButtonSubmitWithoutOverwrite() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickButtonSubmit();
     }
 
     @And("User choose Sync From WhatsApp when Add Bulk")
@@ -997,12 +1042,6 @@ public class GetTextingSteps {
     public void userClickInputFieldChooseWhatsAppNumber() {
         contactListPage = new ContactListPage(driver);
         contactListPage.clickInputFieldChooseWhatsAppNumber();
-    }
-
-    @And("User choose Whatsapp number {string}")
-    public void userChooseWhatsappNumber(String text) {
-        contactListPage = new ContactListPage(driver);
-        contactListPage.chooseWhatsappNumber(text);
     }
 
     @When("User click button Next")
@@ -1026,7 +1065,7 @@ public class GetTextingSteps {
     @Then("Chosen contact will be added to Contact List table")
     public void chosenContactWillBeAddedToContactListTable() {
         contactListPage = new ContactListPage(driver);
-        contactListPage.validateChosenContactWillBeAddedToContactListTable("6282133334531");
+        contactListPage.validateChosenContactWillBeAddedToContactListTable("6281246642229");
     }
 
     @And("User upload excel template overwrite into pop-up Import File")
@@ -1035,10 +1074,10 @@ public class GetTextingSteps {
         contactListPage.uploadExcelTemplateOverwriteIntoPopUpImportFile();
     }
 
-    @Then("Show pop-up Overwrite Data")
-    public void showPopUpOverwriteData() {
+    @Then("Show pop-up Overwrite Data Sync WA")
+    public void showPopUpOverwriteDataSyncWa() {
         contactListPage = new ContactListPage(driver);
-        contactListPage.validateShowPopUpOverwriteData();
+        contactListPage.validateShowPopUpOverwriteDataSyncWa();
     }
 
     @When("User click button Yes, Overwrite")
@@ -1111,6 +1150,12 @@ public class GetTextingSteps {
     public void userClickIconXOnFieldInputSearch() {
         contactListPage = new ContactListPage(driver);
         contactListPage.clickIconXOnFieldInputSearch();
+    }
+
+    @When("User click icon X on field input search on Contact List History page")
+    public void userClickIconXOnFieldInputSearchOnContactListHistoryPage() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickIconXOnFieldInputSearchContactListHistoryPage();
     }
 
     @When("User click icon filter on Contact Name")
@@ -1434,6 +1479,147 @@ public class GetTextingSteps {
     public void searchChatWillFoundNothing() {
         chatPage = new ChatPage(driver);
         chatPage.searchChatWillFoundNothing();
+    }
+
+    @And("Check if there is any unanswered chat")
+    public void checkIfThereIsAnyUnansweredChat() throws InterruptedException {
+        chatPage = new ChatPage(driver);
+        boolean valid = chatPage.checkIfThereIsAnyUnansweredChat();
+
+        if (!valid) {
+            userClickAndTypeOnFieldInputSearchOnSidebarChatbox("6282213294071");
+            userClickContactAfterSearch();
+            userChooseWhatsAppNumber("6282213288475 - Julia");
+            userClickButtonStartChat();
+            userClickFieldInputChatDanType("Halo");
+            userClickButtonSend();
+            thereIsContactChattingWith("6282213294071 - Juliet", "6282213288475 - Julia");
+            userNotSendMessageAndNoInteractionForMin(3);
+            thereIsContactChattingWith("6282213288475 - Julia", "6282213294071 - WA 2");
+            photoProfileContactOnChatboxWillBeYellowHighlighted();
+            userNotSendMessageAndNoInteractionForMin(2);
+        }
+    }
+
+    @And("User click refresh data button on Contact List page")
+    public void userClickRefreshDataButtonOnContactListPage() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickRefreshDataButtonOnContactListPage();
+    }
+
+    @And("User click back to Contact List from Contact History")
+    public void userClickBackToContactListFromContactHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickBackToContactListFromContactHistory();
+    }
+
+    @When("user click action {string} on pop-up")
+    public void userClickActionOnPopUp(String action) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickActionOnPopUp(action);
+    }
+
+    @And("User click button Submit Next")
+    public void userClickButtonSubmitNext() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonSubmitNext();
+    }
+
+    @When("User click menu Contact History")
+    public void userClickMenuContactHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.clickMenuContactHistory();
+    }
+
+    @Then("User will be redirected to page Contact List History")
+    public void userWillBeRedirectedToPageContactListHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userWillBeRedirectedToPageContactListHistory();
+    }
+
+    @And("Will shows table Contact List History")
+    public void willShowsTableContactListHistory() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.willShowsTableContactListHistory();
+    }
+
+    @And("Will shows session id for every activity inside Chat Session")
+    public void willShowsSessionIdForEveryActivityInsideChatSession() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.willShowsSessionIdForEveryActivityInsideChatSession();
+    }
+
+    @And("Will not shows session id for every activity outside Chat Session")
+    public void willNotShowsSessionIdForEveryActivityOutsideChatSession() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.willNotShowsSessionIdForEveryActivityOutsideChatSession();
+    }
+
+    @When("User type {string} on field input search Contact List History page")
+    public void userTypeOnFieldInputSearchContactListHistoryPage(String text) {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userTypeOnFieldInputSearchContactListHistoryPage(text);
+    }
+
+    @When("User click button Export Table")
+    public void userClickButtonExportTable() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonExportTable();
+    }
+
+    @And("User click button Yes, Im Sure on Export Table Confirmation")
+    public void userClickButtonYesImSureOnExportTableConfirmation() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.userClickButtonYesImSureOnExportTableConfirmation();
+    }
+
+    @Then("Contact List History table will be exported to excel format")
+    public void contactListHistoryTableWillBeExportedToExcelFormat() {
+        contactListPage = new ContactListPage(driver);
+        contactListPage.contactListHistoryTableWillBeExportedToExcelFormat();
+    }
+
+    @When("User do hover on last bubble chat and click dropdown")
+    public void userDoHoverOnLastBubbleChatAndClickDropdown() {
+        chatPage = new ChatPage(driver);
+        chatPage.userDoHoverOnLastBubbleChatAndClickDropdown();
+    }
+
+    @And("User click delete message")
+    public void userClickDeleteMessage() {
+        chatPage = new ChatPage(driver);
+        chatPage.userClickDeleteMessage();
+    }
+
+    @Then("User will see pop-up Delete one chat confirmation")
+    public void userWillSeePopUpDeleteOneChatConfirmation() {
+        chatPage = new ChatPage(driver);
+        chatPage.userWillSeePopUpDeleteOneChatConfirmation();
+    }
+
+    @And("User click button Delete Message on confirmation pop-up")
+    public void userClickButtonDeleteMessageOnConfirmationPopUp() {
+        chatPage = new ChatPage(driver);
+        chatPage.userClickButtonDeleteMessageOnConfirmationPopUp();
+    }
+
+    @Then("User open Chatroom {string} from contact {string}")
+    public void userOpenChatroomFromContact(String chatTo, String chatFrom) {
+        chatPage = new ChatPage(driver);
+        chatPage.openContact(chatTo, chatFrom);
+    }
+
+    @And("Upload contacts needed")
+    public void uploadContactsNeeded() {
+        userClickMenuContact();
+        userWillBeRedirectedToPageContactList();
+        userClickButtonAddBulk();
+        userChooseImportFileWhenAddBulk();
+
+        contactListPage = new ContactListPage(driver);
+        contactListPage.uploadContactsNeeded();
+
+        userClickButtonSubmit();
     }
 }
 

@@ -1,10 +1,17 @@
-@Feature
+@Feature @Feature-ChatroomHistory
 Feature: Get Texting - Chatroom History
 
   @Scenario-32
   Scenario: Open Chatroom History
     Given User already login
+    And Revert back contact Rahmadhany
     And User in inbox page
+    When User click and type "6285259027122" on field input search on sidebar chatbox
+    And User click contact after search
+    And User choose WhatsApp Number "6282213288475 - Julia"
+    And User click button Start Chat
+    And User click field input chat dan type "Halo"
+    And User click button 'Send'
     And There is contact "6285259027122 - Rahmadhany" chatting with "6282213288475 - Julia"
     When User click button 'Chatroom History' on Detail Chat Session panel
     Then Chatroom History will be opened

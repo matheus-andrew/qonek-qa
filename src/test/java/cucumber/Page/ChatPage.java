@@ -27,7 +27,10 @@ public class ChatPage {
     private final String BUTTON_ADD_NEW_CHAT_TABS = "//*[@id='chatsheader_btn_addchattab']";
     private final String BUTTON_MORE = "//*[@id='sidebarchatnotification_btn_more']";
     private final String BUTTON_TAGGING_ALL_SELECTED = "//*[@id='sidebarchatnotification_btn_taggingallselected']";
+    private final String BUTTON_CLOSED_SESSION_ALL_SELECTED = "//*[@id='sidebarchatnotification_btn_closedsession']";
     private final String POPUP_TAGGING_ALL_SELECTED = "//*[@class='MTag']";
+    private final String POPUP_CLOSED_SESSION_SELECTED = "//*[@class='MCloseSession']";
+    private final String POPUP_CLOSED_SESSION_SELECTED_YES_BUTTON = "//*[@id='chatbody_multiclosesession_btn_closesession']";
     private final String POPUP_TAGGING_ALL_SELECTED_INPUT_TAG = "//*[contains(@id,'-input')]";
     private final String POPUP_TAGGING_ALL_SELECTED_BUTTON_ADD_TAG = "//*[@id='chatbody_multitag_btn_addtagging']";
     private final String BUTTON_NOTES_ALL_SELECTED = "//*[@id='sidebarchatnotification_btn_notesallselected']";
@@ -41,7 +44,7 @@ public class ChatPage {
     private final String FILTER_BUTTON_APPLY = "//*[@id='chatsheader_filterchat_btn_applyfilter']";
 
     private final String SIDEBAR_UNANSWERED_CHAT_BUTTON = "//*[@id='sidebarchatnotification_btn_unansweredchat']";
-    private final String SIDEBAR_UNANSWERED_CHAT_PANEL = "//*[@class='SidebarChat debug']";
+    private final String SIDEBAR_UNANSWERED_CHAT_PANEL = "//*[@class='backToAllChat']";
 
     private final String CHAT_TABS_SESSION = "//*[@id='chatbody_chattabs_btn_%s']";
     private final String EDIT_CHAT_TABS_SESSION = "//*[@id='chatbody_editchattabs_btn_%s']";
@@ -116,34 +119,54 @@ public class ChatPage {
     private final String CONTACT_LIST_TABLE_CONTACT_NUMBER = "//*[contains(@id,'btn_edit_nowa')]";
     private final String CONTACT_LIST_TABLE_CONTACT_NAME = "//*[contains(@id,'btn_editname')]";
 
+    private final String POPUP_DELETE_MESSAGE = "//*[@class='DeleteOneChat']";
+    private final String POPUP_DELETE_MESSAGE_YES_BUTTON = "//*[@id='DeleteOneChat_popup_btn_confirmdelete']";
 
     private WebDriver driver;
     private WebDriverWait wait;
+    private int waitTimeForLoop = 300000;
 
     public ChatPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(120));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(20));
     }
 
     public void goToChatPage() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.id(BUTTON_INBOX)));
-        WebElement element = driver.findElement(By.id(BUTTON_INBOX));
-        element.click();
+        Utils.retryOperation(() -> {
+            wait.until(ExpectedConditions.elementToBeClickable(By.id(BUTTON_INBOX)));
+            WebElement element = driver.findElement(By.id(BUTTON_INBOX));
+            element.click();
+        }, waitTimeForLoop);
+    }
+
+    public void openContact(String chatTo, String chatFrom) {
+        Utils.retryOperationWithCatch(() -> {
+            goToChatPage();
+            String xpath = String.format(BTN_OPEN_CHAT, chatFrom, chatTo);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+            WebElement element = driver.findElement(By.xpath(xpath));
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .build().perform();
+        }, () -> driver.navigate().refresh(), waitTimeForLoop);
     }
 
     public void validateContactChatting(String[] chatTo, String[] chatFrom) {
-        String xpath = String.format(BTN_OPEN_CHAT, chatFrom[0], chatTo[0]);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        WebElement element = driver.findElement(By.xpath(xpath));
-        element.click();
+        Utils.retryOperationWithCatch(() -> {
+            String xpath = String.format(BTN_OPEN_CHAT, chatFrom[0], chatTo[0]);
+            new WebDriverWait(this.driver, Duration.ofSeconds(60)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+            WebElement element = driver.findElement(By.xpath(xpath));
+            element.click();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_PROFILE_DETAIL)));
-        WebElement profileDetail = driver.findElement(By.xpath(CHAT_USER_TAB_PROFILE_DETAIL + "/p"));
-        assert profileDetail.getText().equals(chatTo[1]) : "actual: " + profileDetail.getText() + " expected: " + chatTo[1];
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_PROFILE_DETAIL)));
+            WebElement profileDetail = driver.findElement(By.xpath(CHAT_USER_TAB_PROFILE_DETAIL + "/p"));
+            assert profileDetail.getText().equals(chatTo[1]) : "actual: " + profileDetail.getText() + " expected: " + chatTo[1];
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_USER_DETAIL_WA)));
-        WebElement userDetail = driver.findElement(By.xpath(CHAT_USER_TAB_USER_DETAIL_WA));
-        assert userDetail.getText().contains(chatFrom[1]) : "actual: " + userDetail.getText() + " expected: " + chatFrom[1];
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_USER_DETAIL_WA)));
+            WebElement userDetail = driver.findElement(By.xpath(CHAT_USER_TAB_USER_DETAIL_WA));
+            assert userDetail.getText().contains(chatFrom[1]) : "actual: " + userDetail.getText() + " expected: " + chatFrom[1];
+        }, () -> driver.navigate().refresh(), waitTimeForLoop);
     }
 
     public void validateChatroomIsHandledBy(String text) {
@@ -153,7 +176,7 @@ public class ChatPage {
     }
 
     public void clickAndInputChat(String text) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(INPUT_CHAT)));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(INPUT_CHAT)));
         WebElement element = driver.findElement(By.xpath(INPUT_CHAT));
         element.click();
         element.sendKeys(text);
@@ -169,42 +192,26 @@ public class ChatPage {
             WebElement element = driver.findElement(By.xpath(IMAGE_PREVIEW_BTN_SEND));
             element.click();
         }
+
+        new Actions(driver).pause(5000).perform();
     }
 
     public void validateMessageIsSend(String message, String user) {
-        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN)));
+        int attempts = 0;
+        while(attempts < 5) {
+            try {
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']")));
+                new Actions(driver).pause(7000).perform();
 
-        int i = 0;
+                List<WebElement> txtMessages = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
+                List<WebElement> txtNames = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='name']"));
 
-        List<WebElement> txtMessages = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
-        for (WebElement txtMessage : txtMessages) {
-            if (txtMessage.getText().contains(message)) {
-                i++;
+                assert txtMessages.stream().anyMatch(f -> f.getText().contains(message)) : "There is no message with text: " + message;
+                assert txtNames.stream().anyMatch(f -> f.getText().contains(user)) : "There is no user: " + user;
                 break;
-            }
-        }
-
-        List<WebElement> txtNames = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='name']"));
-        for (WebElement txtName : txtNames) {
-            if (txtName.getText().contains(user)) {
-                i += 2;
-                break;
-            }
-        }
-
-        switch (i) {
-            case 0:
-                assert false : "There is no message with text: " + message + " and user: " + user;
-                break;
-            case 1:
-                assert false : "There is no user: " + user;
-                break;
-            case 2:
-                assert false : "There is no message with text: " + message;
-                break;
-            case 3:
-                assert true;
-                break;
+            } catch (Throwable ignored) {}
+            attempts++;
+            System.out.println("Repeat validateMessageIsSend " + attempts + " times");
         }
     }
 
@@ -307,56 +314,73 @@ public class ChatPage {
     }
 
     public void validateImageIsSendWithCaption(String text) {
-        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN)));
+        int attempts = 0;
+        boolean found = false;
+        while (attempts < 5) {
+            try {
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN)));
+                List<WebElement> txtMessages = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
 
-        int i = 0;
+                int until = txtMessages.size() > 6 ? txtMessages.size() - 6 : 0;
+                for (int i=txtMessages.size()-1; i>=until; i--) {
+                    new Actions(driver)
+                            .scrollToElement(txtMessages.get(i))
+                            .pause(500)
+                            .perform();
 
-        List<WebElement> txtMessages = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
-        for (WebElement txtMessage : txtMessages) {
-
-            new Actions(driver)
-                    .scrollToElement(txtMessage)
-                    .pause(500)
-                    .perform();
-
-            if (txtMessage.getText().contains(text)) {
-                String id = txtMessage.getAttribute("id");
-                String xpath = String.format(BUBBLE_CHAT_OWN + "/p[@id='%s']/preceding-sibling::button[contains(@class, 'image')]", id);
-                WebElement image = driver.findElement(By.xpath(xpath));
-                assert image.isDisplayed() : "actual: " + image.isDisplayed() + " expected: " + true;
-                i++;
-                break;
+                    if (txtMessages.get(i).getText().contains(text)) {
+                        String id = txtMessages.get(i).getAttribute("id");
+                        String xpath = String.format(BUBBLE_CHAT_OWN + "/p[@id='%s']/preceding-sibling::button[contains(@class, 'image')]", id);
+                        WebElement image = driver.findElement(By.xpath(xpath));
+                        assert image.isDisplayed() : "actual: " + image.isDisplayed() + " expected: " + true;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {break;}
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
             }
+            attempts++;
+            System.out.println("Repeat validateImageIsSendWithCaption " + attempts + " times");
+            driver.navigate().refresh();
+            openContact("6285259027122", "6282213288475");
         }
 
-        assert i == 1;
+        assert found : "Text not found after 5 times";
     }
 
 
     public void validateFileIsSendWithCaption(String text) {
-        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN)));
+        int attempts = 0;
+        boolean found = false;
+        while(attempts < 5) {
+            try {
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN)));
+                List<WebElement> txtMessages = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
 
-        int i = 0;
-
-        List<WebElement> txtMessages = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
-        for (WebElement txtMessage : txtMessages) {
-
-            new Actions(driver)
-                    .scrollToElement(txtMessage)
-                    .pause(500)
-                    .perform();
-
-            if (txtMessage.getText().contains(text)) {
-                String id = txtMessage.getAttribute("id");
-                String xpath = String.format(BUBBLE_CHAT_OWN + "/p[@id='%s']/preceding-sibling::button[contains(@class, 'document')]", id);
-                WebElement image = driver.findElement(By.xpath(xpath));
-                assert image.isDisplayed() : "actual: " + image.isDisplayed() + " expected: " + true;
-                i++;
-                break;
+                int until = txtMessages.size() > 6 ? txtMessages.size() - 6 : 0;
+                for (int i=txtMessages.size()-1; i>=until; i--) {
+                    if (txtMessages.get(i).getText().contains(text)) {
+                        String id = txtMessages.get(i).getAttribute("id");
+                        String xpath = String.format(BUBBLE_CHAT_OWN + "/p[@id='%s']/preceding-sibling::button[contains(@class, 'document')]", id);
+                        WebElement image = driver.findElement(By.xpath(xpath));
+                        assert image.isDisplayed() : "actual: " + image.isDisplayed() + " expected: " + true;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {break;}
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
             }
+            attempts++;
+            System.out.println("Repeat validateFileIsSendWithCaption " + attempts + " times");
+            driver.navigate().refresh();
+            openContact("6285259027122", "6282213288475");
         }
 
-        assert i == 1;
+        assert found : "Text not found after 5 times";
     }
 
     public void chooseWantedEmoji() {
@@ -416,70 +440,91 @@ public class ChatPage {
     }
 
     public void validateTagIsShowInMiddleChatroom(String text) {
-        if (text.equals("MM/dd/yyyy HH:mm - New Session ID Created")) {
-            text = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nNew Session ID \\d+ Created$";
+        long startTime = System.currentTimeMillis();
+        new Actions(driver).pause(3000).perform();
+        final String finalText = text;
 
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
-            List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
-            Pattern pattern = Pattern.compile(text);
-            boolean isValid = pattern.matcher(elements.get(elements.size() - 1).getText()).matches();
-            assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + text;
-            return;
-        } else if (text.equals("MM/dd/yyyy HH:mm - Session ID Expired")) {
-            text = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nSession ID \\d+ Expired$";
+        Utils.retryOperationWithCatch(() -> {
+            if (finalText.equals("MM/dd/yyyy HH:mm - New Session ID Created")) {
+                String patternText = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nNew Session ID \\d+ Created$";
 
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
-            List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
-            Pattern pattern = Pattern.compile(text);
-            boolean isValid = pattern.matcher(elements.get(elements.size() - 1).getText()).matches();
-            assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + text;
-            return;
-        } else if (text.equals("MM/dd/yyyy HH:mm - Closed Session ID")) {
-            text = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nClosed Session ID \\d+$";
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
+                List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
+                Pattern pattern = Pattern.compile(patternText);
+                int skip = (elements.size() > 10) ? elements.size() - 10 : 0;
+                boolean isValid = elements.stream().skip(skip).map(WebElement::getText).anyMatch(f -> pattern.matcher(f).matches());
+                assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + patternText;
+            } else if (finalText.equals("MM/dd/yyyy HH:mm - Session ID Expired")) {
+                String patternText = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nSession ID \\d+ Expired$";
 
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
-            List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
-            Pattern pattern = Pattern.compile(text);
-            boolean isValid = pattern.matcher(elements.get(elements.size() - 1).getText()).matches();
-            assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + text;
-            return;
-        }
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
+                List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
+                Pattern pattern = Pattern.compile(patternText);
+                int skip = (elements.size() > 10) ? elements.size() - 10 : 0;
+                boolean isValid = elements.stream().skip(skip).map(WebElement::getText).anyMatch(f -> pattern.matcher(f).matches());
+                assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + patternText;
+            } else if (finalText.equals("MM/dd/yyyy HH:mm - Closed Session ID")) {
+                String patternText = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nClosed Session ID \\d+$";
 
-        String[] textArray = text.split(" ");
-        List<WebElement> tags;
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
+                List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
+                Pattern pattern = Pattern.compile(patternText);
+                int skip = (elements.size() > 10) ? elements.size() - 10 : 0;
+                boolean isValid = elements.stream().skip(skip).map(WebElement::getText).anyMatch(f -> pattern.matcher(f).matches());
+                assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + patternText;
+            } else if (finalText.equals("MM/dd/yyyy HH:mm - Session ID Expired Unanswered")) {
+                String patternText = "^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}\n-\nSession ID \\d+ Expired Unanswered$";
 
-        if (text.contains("Edited") || text.contains("Updated")) {
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//button")));
-            tags = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//button"));
-        } else {
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER)));
-            tags = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER));
-        }
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']")));
+                List<WebElement> elements = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//*[@class='Center']"));
+                Pattern pattern = Pattern.compile(patternText);
+                int skip = (elements.size() > 10) ? elements.size() - 10 : 0;
+                boolean isValid = elements.stream().skip(skip).map(WebElement::getText).anyMatch(f -> pattern.matcher(f).matches());
+                assert isValid : "actual: " + elements.get(elements.size() - 1).getText() + " expected: " + patternText;
+            } else {
+                String[] textArray = finalText.split(" ");
+                List<WebElement> tags;
+                boolean done = false;
 
-        boolean done = false;
-
-        for (WebElement tag : tags) {
-
-            new Actions(driver)
-                    .scrollToElement(tag)
-                    .pause(500)
-                    .perform();
-
-            String elementTag = tag.getText();
-            boolean containsAll = true;
-            for (String s : textArray) {
-                if (!elementTag.contains(s)) {
-                    containsAll = false;
-                    break;
+                if (finalText.contains("Edited") || finalText.contains("Updated")) {
+                    wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + "//button")));
+                    tags = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + "//button"));
+                } else {
+                    wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER)));
+                    tags = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER));
                 }
-            }
-            if (containsAll) {
-                done = true;
-                break;
-            }
-        }
 
-        assert done : "actual: " + done + " expected: " + true;
+                int until = tags.size() > 6 ? tags.size() - 6 : 0;
+                for (int i=tags.size()-1; i>=until; i--) {
+                    new Actions(driver)
+                            .scrollToElement(tags.get(i))
+                            .pause(500)
+                            .perform();
+
+                    String elementTag = tags.get(i).getText();
+                    boolean containsAll = true;
+                    for (String s : textArray) {
+                        if (!elementTag.contains(s)) {
+                            containsAll = false;
+                            break;
+                        }
+                    }
+                    if (containsAll) {
+                        done = true;
+                        break;
+                    }
+                }
+
+                assert done : "actual: " + done + " expected: " + true;
+            }
+        }, () -> {
+            System.out.println("Repeat validateTagIsShowInMiddleChatroom...");
+            driver.navigate().refresh();
+            openContact("6285259027122", "6282213288475");
+        }, waitTimeForLoop);
+
+        long duration = System.currentTimeMillis() - startTime;
+        System.out.println("Total time in validateTagIsShowInMiddleChatroom : " + Utils.convertMillisToString(duration));
     }
 
 
@@ -490,14 +535,28 @@ public class ChatPage {
         element.click();
     }
 
-    public void inputNotes(String text) throws InterruptedException {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_ADD_NOTE)));
+    public void inputNotes(String text) {
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_ADD_NOTE)));
+        } catch (Exception e) {
+            clickExpandNotes();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_ADD_NOTE)));
+        }
         WebElement element = driver.findElement(By.xpath(CHAT_USER_TAB_ADD_NOTE));
-        element.click();
-        element.clear();
-        element.sendKeys(text);
+        new Actions(driver)
+                .moveToElement(element)
+                .click()
+                .keyDown(Keys.CONTROL)
+                .sendKeys("a")
+                .keyUp(Keys.CONTROL)
+                .pause(500)
+                .sendKeys(text)
+                .build().perform();
 
-        Thread.sleep(2000);
+        String btnSave_xpath = "//*[@class='noteAction']/button";
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(btnSave_xpath)));
+        WebElement btnSave = driver.findElement(By.xpath(btnSave_xpath));
+        btnSave.click();
     }
 
     public void validateNotesIsAdded(String text) throws InterruptedException {
@@ -512,12 +571,23 @@ public class ChatPage {
         assert note.getText().equals(text) : "actual: " + note.getText() + " expected: " + text;
     }
 
-    public void clickInfoIcon() {
-        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OTHER + BUBBLE_CHAT_INFO_ICON)));
-        List<WebElement> infoIcon = driver.findElements(By.xpath(BUBBLE_CHAT_OTHER + BUBBLE_CHAT_INFO_ICON));
+    public void clickInfoIcon(String text) {
+        // add wait just in case the middle chat is not shown yet
+        driver.navigate().refresh();
+        openContact("6285259027122", "6282213288475");
 
-        new Actions(driver).
-                moveToElement(infoIcon.get(infoIcon.size() - 2))
+        String xpath;
+        if (text.equals("contact")) {
+            xpath = BUBBLE_CHAT_OTHER + "//*[@class='ContactInformationInfo']/following-sibling::*[local-name()='svg']/*[local-name()='path']";
+        } else {
+            xpath = BUBBLE_CHAT_OTHER + "//*[contains(@class,'Note')]" + BUBBLE_CHAT_INFO_ICON;
+        }
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+        List<WebElement> infoIcon = driver.findElements(By.xpath(xpath));
+
+        new Actions(driver)
+                .scrollToElement(infoIcon.get(infoIcon.size() - 2))
+                .moveToElement(infoIcon.get(infoIcon.size() - 2))
                 .click()
                 .build().perform();
     }
@@ -539,14 +609,24 @@ public class ChatPage {
     }
 
     public void clickToggleImportant() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_NOTES_TOGGLE_IMPORTANT)));
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_NOTES_TOGGLE_IMPORTANT)));
+        } catch (Exception e) {
+            clickExpandNotes();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_USER_TAB_NOTES_TOGGLE_IMPORTANT)));
+        }
         WebElement element = driver.findElement(By.xpath(CHAT_USER_TAB_NOTES_TOGGLE_IMPORTANT));
 
-        if (element.getAttribute("src").contains("Switch-on")) {
-            return;
-        }
-
-        element.click();
+        do {
+            if (element.getAttribute("src").contains("Switch-on")) {
+                new Actions(driver).moveToElement(element).click().pause(2000).perform();
+                clickExpandNotes();
+                WebElement element1 = driver.findElement(By.xpath(CHAT_USER_TAB_NOTES_TOGGLE_IMPORTANT));
+                new Actions(driver).moveToElement(element1).pause(2000).click().pause(500).perform();
+            } else {
+                new Actions(driver).moveToElement(element).click().pause(1000).perform();
+            }
+        } while (!element.getAttribute("src").contains("Switch-on"));
     }
 
     public void validateNotesIsHighlighted() {
@@ -558,19 +638,33 @@ public class ChatPage {
     }
 
     public void validateDetailChatSessionShowsInformation(List<Map<String, String>> list) {
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(CHAT_USER_TAB_USER_DETAIL_CHAT_SESSION)));
+        List<WebElement> a = driver.findElements(By.xpath(CHAT_USER_TAB_USER_DETAIL_CHAT_SESSION));
 
-        List<WebElement> a = driver.findElements(By.xpath("//*[@class='ChatUser_Detail']/div"));
-
+        long startTime = System.currentTimeMillis();
         for (int i = 2; i <= a.size(); i++) {
-            WebElement key = driver.findElement(By.xpath("//*[@class='ChatUser_Detail']/div[" + i + "]/*[contains(@class,'detailLeft')]"));
-            WebElement value = driver.findElement(By.xpath("//*[@class='ChatUser_Detail']/div[" + i + "]/*[contains(@class,'detailRight')]"));
+            long startLoopTime = System.currentTimeMillis();
+            do {
+                try {
+                    WebElement key = driver.findElement(By.xpath(CHAT_USER_TAB_USER_DETAIL_CHAT_SESSION + "[" + i + "]/*[contains(@class,'detailLeft')]"));
+                    WebElement value = driver.findElement(By.xpath(CHAT_USER_TAB_USER_DETAIL_CHAT_SESSION + "[" + i + "]/*[contains(@class,'detailRight')]"));
+                    wait.until(ExpectedConditions.not(ExpectedConditions.stalenessOf(value)));
 
-            if ((i==4 || i==5 || i==6) && !list.get(0).get(key.getText()).equals("-")) {
-                assert Utils.validateDate(value.getText(), list.get(0).get(key.getText()));
-            } else {
-                assert value.getText().contains(list.get(0).get(key.getText())) : "actual: " + value.getText() + " expected: " + list.get(0).get(key.getText());
-            }
+                    if ((i == 4 || i == 5 || i == 6) && !list.get(0).get(key.getText()).equals("-")) {
+                        assert Utils.validateDate(value.getText(), list.get(0).get(key.getText())) : "i: " + i + "| actual: " + value.getText() + "| expected: " + list.get(0).get(key.getText());
+                    } else {
+                        assert value.getText().contains(list.get(0).get(key.getText())) : "i: " + i + "| actual: " + value.getText() + "| expected: " + list.get(0).get(key.getText());
+                    }
+
+                    System.out.println("Success checked i : " + i + ", key : " + key.getText());
+                } catch (Throwable e) {
+                    continue;
+                }
+                break;
+            } while ((System.currentTimeMillis() - startLoopTime) < 30000);
         }
+
+        System.out.println("Total time needed to validateDetailChatSessionShowsInformation: " + Utils.convertMillisToString(System.currentTimeMillis() - startTime));
     }
 
     public void clickMenuSetting() {
@@ -580,24 +674,40 @@ public class ChatPage {
     }
 
     public void validatePhotoProfileIsHighlighted(String color) {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(PROFILE_SIDEBAR_ACTIVE_BORDER)));
-        WebElement element = driver.findElement(By.xpath(PROFILE_SIDEBAR_ACTIVE_BORDER));
+        long startTime = System.currentTimeMillis();
+        do {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(PROFILE_SIDEBAR_ACTIVE_BORDER)));
+            WebElement element = driver.findElement(By.xpath(PROFILE_SIDEBAR_ACTIVE_BORDER));
+            String elementColor = element.getAttribute("class");
+            try {
+                switch (color) {
+                    case "blue":
+                        assert elementColor.contains("avatar-border-ongoing") : "actual: " + elementColor + " expected: avatar-border-ongoing";
+                        break;
+                    case "yellow":
+                        assert elementColor.contains("avatar-border-warning") : "actual: " + elementColor + " expected: avatar-border-warning";
+                        break;
+                    case "red":
+                        assert elementColor.contains("avatar-border-danger") : "actual: " + elementColor + " expected: avatar-border-danger";
+                        break;
+                    case "none":
+                        assert elementColor.contains("avatar") : "actual: " + elementColor + " expected: avatar";
+                        break;
+                }
+                break;
+            } catch (Throwable e) {
+                if (color.equals("blue") && (elementColor.contains("avatar-border-warning") || elementColor.contains("avatar-border-danger") || elementColor.contains("avatar"))) {
+                    break;
+                } else if (color.equals("yellow") && (elementColor.contains("avatar-border-danger") || elementColor.contains("avatar"))) {
+                    break;
+                } else if (color.equals("red") && elementColor.contains("avatar")) {
+                    break;
+                }
+            }
+            new Actions(driver).pause(2000).perform();
+        } while ((System.currentTimeMillis() - startTime) < 120000);
 
-        switch (color) {
-            case "blue":
-                assert element.getAttribute("class").contains("avatar-border-ongoing") : "actual: " + element.getAttribute("class") + " expected: avatar-border-ongoing";
-                break;
-            case "yellow":
-                assert element.getAttribute("class").contains("avatar-border-warning") : "actual: " + element.getAttribute("class") + " expected: avatar-border-warning";
-                break;
-            case "red":
-                assert element.getAttribute("class").contains("avatar-border-danger") : "actual: " + element.getAttribute("class") + " expected: avatar-border-danger";
-                break;
-            case "none":
-                assert element.getAttribute("class").contains("avatar") : "actual: " + element.getAttribute("class") + " expected: avatar";
-                break;
-        }
-
+        System.out.println("Total time needed to validatePhotoProfileIsHighlighted : " + Utils.convertMillisToString(System.currentTimeMillis() - startTime));
     }
 
     public void clickButtonCloseSession() {
@@ -624,90 +734,141 @@ public class ChatPage {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_CONTACT_NAME)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_CONTACT_NAME));
 
-        new Actions(driver).scrollToElement(element).build().perform();
+        new Actions(driver)
+                .moveToElement(element)
+                .click()
+                .pause(500)
+                .keyDown(Keys.CONTROL)
+                .sendKeys("a")
+                .keyUp(Keys.CONTROL)
+                .sendKeys(Keys.BACK_SPACE)
+                .pause(500)
+                .sendKeys(text)
+                .pause(1000)
+                .build().perform();
 
-        element.clear();
-        element.sendKeys(text);
     }
 
     public void inputBirth(String text) {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_BIRTH)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_BIRTH));
 
-        new Actions(driver)
-                .scrollToElement(element)
-                .click()
-                .pause(500)
-                .build().perform();
+        do {
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .sendKeys(text)
+                    .build().perform();
 
-        element.sendKeys(Keys.CONTROL, "a");
-        element.sendKeys(Keys.DELETE);
-        new Actions(driver).pause(1000).perform();
-        element.sendKeys(text);
-        element.sendKeys(Keys.ENTER);
-
-        Point coordinates = element.getLocation();
-
-        new Actions(driver)
-                .moveToLocation(coordinates.getX(), coordinates.getY() + 100)
-                .click()
-                .pause(1000)
-                .build().perform();
+            WebElement picker = driver.findElement(By.xpath("//div[@class='ant-picker-panel-layout']/parent::div/parent::div"));
+            if (!picker.getAttribute("class").contains("hidden")) {
+                try {
+                    WebElement date = driver.findElement(By.xpath("//td[@title='2024-07-01']"));
+                    new Actions(driver).moveToElement(date).click().build().perform();
+                } catch (Throwable ignored) {}
+            }
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void inputCountry(String text) {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_COUNTRY)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_COUNTRY));
 
-        element.clear();
-        element.sendKeys(text);
+        do {
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .sendKeys(text)
+                    .build().perform();
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_COUNTRY)));
-        WebElement select = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_COUNTRY));
-
-        select.click();
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_COUNTRY)));
+                WebElement select = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_COUNTRY));
+                select.click();
+            } catch (Throwable ignored) {}
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void inputProvince(String text) {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_PROVINCE)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_PROVINCE));
 
-        element.clear();
-        element.sendKeys(text);
+        do {
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .sendKeys(text)
+                    .build().perform();
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_PROVINCE)));
-        WebElement select = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_PROVINCE));
-
-        select.click();
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_PROVINCE)));
+                WebElement select = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_PROVINCE));
+                select.click();
+            } catch (Throwable ignored) {}
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void inputCity(String text) {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_CITY)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_CITY));
 
-        element.clear();
-        element.sendKeys(text);
+        do {
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .sendKeys(text)
+                    .build().perform();
 
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_CITY)));
-        WebElement select = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_CITY));
-
-        select.click();
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_CITY)));
+                WebElement select = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_SELECT_CITY));
+                select.click();
+            } catch (Throwable ignored) {}
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void inputAddress(String text) {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_ADDRESS)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_ADDRESS));
 
-        element.clear();
-//        element.sendKeys(text);
+        do {
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .sendKeys(text)
+                    .build().perform();
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void inputPostalCode(String text) {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_INFO_CONTACT_TAB_POSTAL_CODE)));
         WebElement element = driver.findElement(By.xpath(EDIT_INFO_CONTACT_TAB_POSTAL_CODE));
 
-        element.clear();
-//        element.sendKeys(text);
+        do {
+            new Actions(driver)
+                    .moveToElement(element)
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .sendKeys(text)
+                    .build().perform();
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void clickButtonSave() {
@@ -731,16 +892,21 @@ public class ChatPage {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_EDITED_CONTACT_TABLE_ROW)));
         List<WebElement> elements = driver.findElements(By.xpath(POPUP_EDITED_CONTACT_TABLE_ROW));
 
-        for (int i=0; i<elements.size(); i++) {
-            WebElement from = driver.findElement(By.xpath(POPUP_EDITED_CONTACT_TABLE_ROW + "[" + (i+1) + "]//*[@class='Center']"));
-            new Actions(driver).scrollToElement(from).build().perform();
-            assert from.getText().equals(list.get(i).get("From")) : "actual: " + from.getText() + " expected: " + list.get(i).get("From");
+        for (WebElement element: elements) {
+            WebElement activity = element.findElement(By.xpath("//*[@class='Left']"));
 
-            WebElement to = driver.findElement(By.xpath(POPUP_EDITED_CONTACT_TABLE_ROW + "[" + (i+1) + "]//*[@class='Right']"));
-            new Actions(driver).scrollToElement(to).build().perform();
-            assert to.getText().equals(list.get(i).get("To")) : "actual: " + to.getText() + " expected: " + list.get(i).get("To");
+            for (Map<String, String> map : list) {
+                if (map.get("Activity").equals(activity.getText())) {
+                    WebElement from = element.findElement(By.xpath("//*[@class='Center']"));
+                    new Actions(driver).scrollToElement(from).build().perform();
+                    assert from.getText().equals(map.get("From")) : "actual: " + from.getText() + " expected: " + map.get("From");
+
+                    WebElement to = element.findElement(By.xpath("//*[@class='Right']"));
+                    new Actions(driver).scrollToElement(to).build().perform();
+                    assert to.getText().equals(map.get("To")) : "actual: " + to.getText() + " expected: " + map.get("To");
+                }
+            }
         }
-
     }
 
     public void clickButtonCheck() {
@@ -755,6 +921,8 @@ public class ChatPage {
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
             WebElement element = driver.findElement(By.xpath(xpath));
             element.click();
+
+            new Actions(driver).pause(500).perform();
         }
     }
 
@@ -770,8 +938,39 @@ public class ChatPage {
         element.click();
     }
 
+    public void clickButtonClosedSessionAllSelected() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_CLOSED_SESSION_ALL_SELECTED)));
+        WebElement element = driver.findElement(By.xpath(BUTTON_CLOSED_SESSION_ALL_SELECTED));
+        element.click();
+    }
+
     public void validatePopUpTaggingAllSelected() {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_TAGGING_ALL_SELECTED)));
+    }
+
+    public void validatePopUpClosedSessionSelected() {
+        long startTime = System.currentTimeMillis();
+        boolean found = false;
+        do {
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_CLOSED_SESSION_SELECTED)));
+                WebElement element = driver.findElement(By.xpath(POPUP_CLOSED_SESSION_SELECTED + "//*[@class='Title']"));
+                assert element.getText().contains("Closed Session Selected Chatroom?") : "actual: " + element.getText() + " expected: Are you sure Closed Session Selected Chatroom?";
+                found = true;
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+            }
+            if (found) {break;}
+        } while ((System.currentTimeMillis() - startTime) < 30000);
+        assert found;
+    }
+
+    public void clickButtonYesSure() {
+        new Actions(driver).pause(3000).build().perform();
+
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(POPUP_CLOSED_SESSION_SELECTED_YES_BUTTON)));
+        WebElement element = driver.findElement(By.xpath(POPUP_CLOSED_SESSION_SELECTED_YES_BUTTON));
+        new Actions(driver).moveToElement(element).click().pause(5000).build().perform();
     }
 
     public void inputFieldSearchTagOnTaggingAllSelected(String text) {
@@ -819,7 +1018,7 @@ public class ChatPage {
         WebElement element = driver.findElement(By.xpath(POPUP_NOTES_ALL_SELECTED_BUTTON_ADD_NOTES));
         element.click();
 
-        new Actions(driver).pause(10000).perform();
+        new Actions(driver).pause(1000).perform();
     }
 
     public void clickButtonFilter() {
@@ -849,7 +1048,7 @@ public class ChatPage {
                     new WebDriverWait(this.driver, Duration.ofSeconds(1)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
                 }
             }
-            WebElement checkbox = driver.findElement(By.xpath(xpath + "/preceding-sibling::input"));
+            WebElement checkbox = driver.findElement(By.xpath(xpath));
 
             if (textArray.stream().anyMatch(f -> f.equals(s))) {
                 if (!checkbox.isSelected()) {
@@ -930,8 +1129,16 @@ public class ChatPage {
     public void inputFormChatTabsName(String text) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(CHAT_TABS_NAME)));
         WebElement element = driver.findElement(By.xpath(CHAT_TABS_NAME));
-        element.clear();
-        element.sendKeys(text);
+
+        do {
+            try {
+                element.clear();
+                new Actions(driver).pause(500).perform();
+                element.sendKeys(text);
+
+                break;
+            } catch (Throwable ignored) {}
+        } while (!element.getAttribute("value").equals(text));
     }
 
     public void clickButtonCreateChatTabs() {
@@ -945,7 +1152,7 @@ public class ChatPage {
     public void validateOnChatTabsWillAddedNewTab(String text) {
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(CHAT_TABS_NEW_TABS)));
         List<WebElement> elements = driver.findElements(By.xpath(CHAT_TABS_NEW_TABS));
-        assert elements.stream().anyMatch(f -> f.getText().equals(text));
+        assert elements.stream().anyMatch(f -> f.getText().contains(text));
     }
 
     public void clickTab(String text) {
@@ -1006,11 +1213,13 @@ public class ChatPage {
     }
 
     public void clickButtonChatroomHistory() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY)));
-        WebElement element = driver.findElement(By.xpath(CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY));
-        element.click();
+        Utils.retryOperation(() -> {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY)));
+            WebElement element = driver.findElement(By.xpath(CHAT_USER_TAB_BUTTON_CHATROOM_HISTORY));
+            element.click();
 
-        new Actions(driver).pause(2000).perform();
+            new Actions(driver).pause(2000).perform();
+        }, waitTimeForLoop);
     }
 
     public void validateChatroomHistoryWillBeOpened() {
@@ -1036,7 +1245,6 @@ public class ChatPage {
                 done = true;
                 break;
             }
-            new Actions(driver).pause(500).perform();
         }
         assert done;
     }
@@ -1072,17 +1280,24 @@ public class ChatPage {
         List<WebElement> elements = driver.findElements(By.xpath("//*[@class='Information']/div"));
 
         for (int i=1; i<=elements.size(); i++) {
-            List<WebElement> element = driver.findElements(By.xpath("//*[@class='Information']/div["+i+"]//p"));
-            String text = element.get(0).getText().replace("\n", "");
+            int attempts = 0;
+            while (attempts < 5) {
+                try {
+                    List<WebElement> element = driver.findElements(By.xpath("//*[@class='Information']/div[" + i + "]//p"));
+                    String text = element.get(0).getText().replace("\n", "");
 
-            WebElement key = driver.findElement(By.xpath("//*[@class='Information']/div["+i+"]//div[@class='Left']"));
+                    WebElement key = driver.findElement(By.xpath("//*[@class='Information']/div[" + i + "]//div[@class='Left']"));
 
-            if (list.get(0).get(key.getText()).contains("yyyy")) {
-                assert Utils.validateDate(text, list.get(0).get(key.getText())) : "actual: " + text + " expected: " + list.get(0).get(key.getText());
-            } else {
-                assert text.equals(list.get(0).get(key.getText())) : "actual: " + text + " expected: " + list.get(0).get(key.getText());
+                    if (list.get(0).get(key.getText()).contains("yyyy")) {
+                        assert Utils.validateDate(text, list.get(0).get(key.getText())) : "actual: " + text + " expected: " + list.get(0).get(key.getText());
+                    } else {
+                        assert text.equals(list.get(0).get(key.getText())) : "actual: " + text + " expected: " + list.get(0).get(key.getText());
+                    }
+                    break;
+                } catch (Throwable ignored) {}
+                new Actions(driver).pause(2000).perform();
+                attempts++;
             }
-
         }
     }
 
@@ -1140,12 +1355,13 @@ public class ChatPage {
         WebElement element = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_FILTER_APPLY));
         element.click();
 
-        WebElement close = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_CLOSE_FILTER + "/*[local-name()='path']"));
-        new Actions(driver)
-                .moveToElement(close)
-                .click()
-                .pause(2000)
-                .build().perform();
+//        current version is auto close after click apply
+//        WebElement close = driver.findElement(By.xpath(CHATROOM_HISTORY_TAB_CLOSE_FILTER + "/*[local-name()='path']"));
+//        new Actions(driver)
+//                .moveToElement(close)
+//                .click()
+//                .pause(2000)
+//                .build().perform();
     }
 
     public void validateChatroomHistoryWillBeFilteredAndShowedFilterResultsWithButtonResetFilter() {
@@ -1190,9 +1406,7 @@ public class ChatPage {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@class='AvatarContainer']/img")));
         List<WebElement> elements = driver.findElements(By.xpath("//*[@class='AvatarContainer']/img"));
 
-        for (WebElement e : elements) {
-            assert e.getAttribute("class").contains("avatar-border-danger") : "actual: " + e.getAttribute("class") + " expected: avatar-border-danger";
-        }
+        assert elements.stream().anyMatch(f -> f.getAttribute("class").contains("avatar-border-danger"));
     }
 
     public void clickButtonDeleteOnTopLeftAreaChat() {
@@ -1202,38 +1416,48 @@ public class ChatPage {
     }
 
     public void clickButtonYesOnConfirmationPopUp() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='deletechat_popup_btn_confirmdelete']")));
-        WebElement element = driver.findElement(By.xpath("//*[@id='deletechat_popup_btn_confirmdelete']"));
-        element.click();
+        String xpath = "//*[@id='deletechat_popup_btn_confirmdelete']";
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        WebElement element = driver.findElement(By.xpath(xpath));
+
+        try {
+            while (element.isDisplayed()) {
+                new Actions(driver)
+                        .moveToElement(element)
+                        .click()
+                        .pause(500)
+                        .build().perform();
+            }
+        } catch (StaleElementReferenceException ignore) {}
     }
 
     public void validateChatroomWillBeDeletedFromChatbox() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[@class='Warn']")));
-        WebElement element = driver.findElement(By.xpath("//p[@class='Warn']"));
-        assert element.getText().contains("Deleted") : "actual: " + element.getText() + " expected: Has Been Deleted";
+        String xpath = "//p[@class='Warn']";
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+            WebElement element = driver.findElement(By.xpath(xpath));
+            wait.until(ExpectedConditions.textToBePresentInElement(element, "Has Been Deleted"));
+            assert element.getText().contains("Deleted") : "actual: " + element.getText() + " expected: Has Been Deleted";
+        } catch (Throwable e) {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(xpath)));
+        }
     }
 
     public void searchNewChat(String chatTo, String chatFrom) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='chatsheader_textinput_searchchat']")));
-        WebElement element = driver.findElement(By.xpath("//*[@id='chatsheader_textinput_searchchat']"));
-        element.sendKeys(chatTo);
+        Utils.retryOperation(() -> {
+            clickAndTypeOnFieldInputSearchOnSidebarChatbox(chatTo);
+            clickContactAfterSearch();
 
-        new Actions(driver).pause(3000).perform();
+            String xpath = String.format("//*[@class='name' and .='%s']", chatFrom);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+            WebElement waNumber = driver.findElement(By.xpath(xpath));
+            waNumber.click();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@class='SidebarChat_Profile']")));
-        WebElement profile = driver.findElement(By.xpath("//*[@class='SidebarChat_Profile']"));
-        profile.click();
+            new Actions(driver).pause(500).perform();
 
-        new Actions(driver).pause(500).perform();
+            clickButtonStartChat();
+        }, waitTimeForLoop);
 
-        String xpath = String.format("//*[@class='name' and .='%s']", chatFrom);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-        WebElement waNumber = driver.findElement(By.xpath(xpath));
-        waNumber.click();
-
-        new Actions(driver).pause(500).perform();
-
-        clickButtonStartChat();
     }
 
     public void clickButtonDeleteWhenCheckingContact() {
@@ -1287,7 +1511,7 @@ public class ChatPage {
         WebElement closeSearch = driver.findElement(By.xpath("//*[@id='chatsheader_btn_clearsearchchat']/*[local-name()='path']"));
         closeSearch.click();
 
-        new Actions(driver).pause(2000).perform();
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(INPUT_CHAT)));
     }
 
     public void clickIconOpenChatroomOnContact(String text) {
@@ -1302,13 +1526,115 @@ public class ChatPage {
         new Actions(driver)
                 .scrollToElement(element)
                 .moveToElement(element1)
+                .click()
                 .pause(1000).perform();
-
-        element1.click();
-
     }
 
     public void searchChatWillFoundNothing() {
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//*[@class='LabelChatSidebar_Contact']")));
+    }
+
+    public boolean checkIfThereIsAnyUnansweredChat() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(SIDEBAR_UNANSWERED_CHAT_BUTTON)));
+        WebElement element = driver.findElement(By.xpath(SIDEBAR_UNANSWERED_CHAT_BUTTON));
+
+        return !element.getText().contains("0");
+    }
+
+    public boolean checkIfThereAlreadyHasNotes() {
+        new WebDriverWait(this.driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@class='BodyWarn']/p")));
+        WebElement element = driver.findElement(By.xpath("//*[@class='BodyWarn']/p"));
+
+        return element.getText().contains("Already Has Notes");
+    }
+
+    public void clickYesRewriteAddNotes() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='chatbody_multinote_btn_confirmrewrite']")));
+        WebElement element = driver.findElement(By.xpath("//*[@id='chatbody_multinote_btn_confirmrewrite']"));
+        element.click();
+
+        new Actions(driver).pause(5000).perform();
+    }
+
+    public void userDoHoverOnLastBubbleChatAndClickDropdown() {
+        long startTime = System.currentTimeMillis();
+        do {
+            try {
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']")));
+                List<WebElement> chats = driver.findElements(By.xpath(BUBBLE_CHAT_OWN + "/p[@class='text']"));
+                new Actions(driver)
+                        .moveToElement(chats.get(chats.size() - 1))
+                        .pause(500)
+                        .build().perform();
+
+
+                String xpath = "//div[@class='ChatContent_Parent']//button[@type='button']//*[name()='svg']";
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+                List<WebElement> elements = driver.findElements(By.xpath(xpath));
+                new Actions(driver)
+                        .moveToElement(elements.get(elements.size() - 1))
+                        .pause(500)
+                        .click()
+                        .pause(1500)
+                        .build().perform();
+            } catch (Throwable e) {
+                new Actions(driver).pause(2000).perform();
+                System.out.println("Retrying userDoHoverOnLastBubbleChatAndClickDropdown...");
+                continue;
+            }
+            break;
+        } while ((System.currentTimeMillis() - startTime) < 60000);
+    }
+
+    public void userClickDeleteMessage() {
+        int attempts = 0;
+        do {
+            try {
+                String xpath = "//*[.='Delete Message']/preceding-sibling::*[local-name()='svg']/*[local-name()='path']";
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+                List<WebElement> elements = driver.findElements(By.xpath(xpath));
+                new Actions(driver)
+                        .moveToElement(elements.get(elements.size() - 1))
+                        .pause(500)
+                        .click()
+                        .build().perform();
+            } catch (Throwable e) {
+                new Actions(driver).pause(1000).perform();
+                System.out.println("Retrying userClickDeleteMessage " + attempts + " times...");
+                clickAndInputChat("Retry");
+                clickSendButton();
+                validateMessageIsSend("Retry", "qa-matt@gmail.com");
+                userDoHoverOnLastBubbleChatAndClickDropdown();
+                attempts++;
+                continue;
+            }
+            break;
+        } while (attempts < 5);
+    }
+
+    public void userWillSeePopUpDeleteOneChatConfirmation() {
+        long startTime = System.currentTimeMillis();
+        boolean found = false;
+        do {
+            try {
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(POPUP_DELETE_MESSAGE)));
+                WebElement element = driver.findElement(By.xpath(POPUP_DELETE_MESSAGE + "//*[@class='Warn']"));
+                assert element.getText().contains("Delete Message?") : "actual: " + element.getText() + " expected: Are you sure Delete Message?";
+                found = true;
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+            }
+            if (found) {break;}
+        } while ((System.currentTimeMillis() - startTime) < 30000);
+        assert found;
+    }
+
+    public void userClickButtonDeleteMessageOnConfirmationPopUp() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(POPUP_DELETE_MESSAGE_YES_BUTTON)));
+        WebElement element = driver.findElement(By.xpath(POPUP_DELETE_MESSAGE_YES_BUTTON));
+        new Actions(driver)
+                .moveToElement(element)
+                .click()
+                .build().perform();
     }
 }

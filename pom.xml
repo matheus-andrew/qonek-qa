@@ -11,6 +11,7 @@
 
     <properties>
         <cucumber.version>7.18.0</cucumber.version>
+        <selenium.version>4.23.0</selenium.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -52,7 +53,7 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.11.0</version>
+            <version>${selenium.version}</version>
         </dependency>
 
         <dependency>
@@ -101,6 +102,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
+                    <skipAfterFailureCount>1</skipAfterFailureCount>
                     <includes>
                         <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
 <!--                        <include>**/RunCucumberIT.java</include>-->
@@ -110,6 +112,25 @@
                     <!-- UNCOMMENT BELOW TO RUN PARALLEL -->
 <!--                    <parallel>methods</parallel>-->
 <!--                    <threadCount>4</threadCount>-->
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.trivago.rta</groupId>
+                <artifactId>cluecumber-maven</artifactId>
+                <version>3.7.1</version>
+                <executions>
+                    <execution>
+                        <id>report</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>reporting</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sourceJsonReportDirectory>${project.build.directory}/cucumber-report</sourceJsonReportDirectory>
+                    <generatedHtmlReportDirectory>${project.build.directory}/generated-report</generatedHtmlReportDirectory>
                 </configuration>
             </plugin>
 

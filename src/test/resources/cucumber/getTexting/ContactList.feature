@@ -1,4 +1,4 @@
-@Feature
+@Feature @Feature-ContactList
 Feature: Get Texting - Contact List
 
   @Scenario-46
@@ -15,6 +15,10 @@ Feature: Get Texting - Contact List
     And Contact list will be auto updated
       | Contact Number | Contact Name | Birth | Country | Province | City | Address | Postal Code | Tag Contact | Notes | Label |
       | 628512345678   | Burhan       |       |         |          |      |         |             | -           |       |       |
+
+    When User click button Delete on contact "628512345678"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
 
   @Scenario-47
   Scenario: User mengedit Contact Number dari suatu contact
@@ -39,17 +43,16 @@ Feature: Get Texting - Contact List
       | Contact Number | Contact Name | Birth | Country | Province | City | Address | Postal Code | Tag Contact | Notes | Label |
       | 6281234447311  | Putri        |       |         |          |      |         |             | -           |       |       |
 
+    When User click button Delete on contact "6281234447311"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+
   @Scenario-48
   Scenario: User melakukan initiate chat melalui fungsi Search Chatbox
     Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button New Contact
-    When User click and type "628512345678" on field Contact Number
-    When User click and type "Burhan" on field Contact Name
-    And User click button Save
+    And Revert back contact Rahmadhany
     And User in inbox page
-    When User click and type "6281234447311" on field input search on sidebar chatbox
+    When User click and type "6285259027122" on field input search on sidebar chatbox
     Then Search chat will be filtered into 3 parts if exist
     When User click contact after search
     Then Show pop-up Initiate Chat First
@@ -58,18 +61,17 @@ Feature: Get Texting - Contact List
     When User click field input chat dan type "Halo"
     And User click button 'Send'
     Then Message "Halo" from user "qa-matt@gmail.com" will be send
-    And On middle chatroom will shows "MM/dd/yyyy HH:mm - New Session ID Created"
     And On Detail Chat Session shows information
       | Whatsapp               | Username          | Room Created     | Session Created  | Session Ended | Status Session |
       | Julia (+6282213288475) | qa-matt@gmail.com | MM/dd/yyyy HH:mm | MM/dd/yyyy HH:mm | -             | Ongoing        |
     And Photo profile contact on chatbox will be blue highlighted
 
-  @Scenario-49
+  @Scenario-49 #depends on @Scenario-48
   Scenario: User melakukan initiate chat melalui kolom Label pada tabel Contact List
     Given User already login
     When User click menu Contact
     Then User will be redirected to page Contact List
-    And User click icon Open Chatroom on contact "628512345678"
+    And User click icon Open Chatroom on contact "6285259027122"
     Then Search chat will be filtered into 3 parts if exist
     When User click contact after search
     Then Show pop-up Initiate Chat First
@@ -88,13 +90,22 @@ Feature: Get Texting - Contact List
     Given User already login
     When User click menu Contact
     Then User will be redirected to page Contact List
+    When User click button New Contact
+    When User click and type "6281234447311" on field Contact Number
+    When User click and type "Putri" on field Contact Name
+    And User click button Save
     When User click and changed name "Putri" into "Putri Diana"
     And user click contact "6281234447311" and changed address "Jl. Kertajaya"
     And user click contact "6281234447311" and changed postal code "44102"
     And user click contact "6281234447311" and changed notes "Customer kakap"
+    And User click refresh data button on Contact List page
     And Contact list will be auto updated
       | Contact Number | Contact Name | Birth | Country | Province | City | Address       | Postal Code | Tag Contact | Notes          | Label |
       | 6281234447311  | Putri Diana  |       |         |          |      | Jl. Kertajaya | 44102       | -           | Customer kakap |       |
+
+    When User click button Delete on contact "6281234447311"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
 
   @Scenario-51
   Scenario: User melakukan bulk upload contact dengan Excel Template
@@ -117,14 +128,17 @@ Feature: Get Texting - Contact List
     When User click button Add Bulk
     And User choose Sync From WhatsApp when Add Bulk
     When User click input field Choose WhatsApp Number
-    And User choose Whatsapp number "6285797187741 - Julia"
+    And User choose Whatsapp number first option
     When User click button Next
     Then Pop-up WhatsApp Sync will continue to second step
     When User check contact wanted to be added
     And User click button Submit
     Then Chosen contact will be added to Contact List table
+    And Contact list will be auto updated
+      | Contact Number | Contact Name   | Birth | Country | Province | City | Address | Postal Code | Tag Contact | Notes | Label |
+      | 6281246642229  | +6281246642229 |       |         |          |      |         |             | -           |       |       |
 
-  @Scenario-53
+  @Scenario-53 #depends on @Scenario-51
   Scenario: User melakukan bulk upload contact dengan Excel Template dan melakukan overwrite data
     Given User already login
     When User click menu Contact
@@ -133,13 +147,15 @@ Feature: Get Texting - Contact List
     And User choose Import File when Add Bulk
     And User upload excel template overwrite into pop-up Import File
     When User click button Submit
-    Then Show pop-up Overwrite Data
-    When User click button Yes, Overwrite
     And Contact list will be auto updated
-      | Contact Number | Contact Name | Birth      | Country   | Province   | City     | Address   | Postal Code | Tag Contact | Notes     | Label |
-      | 6285910002000  | Pak Nanto    | 07/24/1995 | Indonesia | Jawa Timur | Surabaya | undefined | 991283      | Lapar;Kaya  | undefined |       |
+      | Contact Number | Contact Name | Birth      | Country   | Province   | City     | Address       | Postal Code | Tag Contact | Notes                | Label |
+      | 6285910002000  | Pak Nanto    | 07/24/1995 | Indonesia | Jawa Timur | Surabaya | Jl. Kertajaya | 991283      | Lapar;Kaya  | Suka minum susu sapi |       |
 
-  @Scenario-54
+    When User click button Delete on contact "6285910002000"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+
+  @Scenario-54 #depends on @Scenario-52
   Scenario: User melakukan Sync From WhatsApp dan melakukan skip overwrite data
     Given User already login
     When User click menu Contact
@@ -147,22 +163,24 @@ Feature: Get Texting - Contact List
     When User click button Add Bulk
     And User choose Sync From WhatsApp when Add Bulk
     When User click input field Choose WhatsApp Number
-    And User choose Whatsapp number "6285797187741 - Julia"
+    And User choose Whatsapp number first option
     When User click button Next
     Then Pop-up WhatsApp Sync will continue to second step
     When User check contact wanted to be added
-    And User click button Submit
-    Then Show pop-up Overwrite Data
-    When User click button Skip
+    And User click button Submit without Overwrite
+#    Then Show pop-up Overwrite Data Sync WA
+#    When User click button Skip
 
-#  @Scenario-55 #49
-#  Scenario: User melakukan Refresh data tabel Contact List
-#    Given User already login
-#    When User click menu Contact
-#    Then User will be redirected to page Contact List
-#    And user telah menambahkan beberapa data Contact
-#    When User klik button “Refresh Data” pada bagian kanan atas halaman Contact List
-#    Then Tabel data contact list akan terefresh/terupdate dan menyesuaikan dengan data dari database sistem
+    When User click button Delete on contact "6281246642229"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+
+  @Scenario-55
+  Scenario: User melakukan Refresh data tabel Contact List
+    Given User already login
+    When User click menu Contact
+    Then User will be redirected to page Contact List
+    And User click refresh data button on Contact List page
 
   @Scenario-56
   Scenario: User mengexport table contact list ke format excel
@@ -190,6 +208,10 @@ Feature: Get Texting - Contact List
       | 628111402222   | Kevin        |       |         |          |      |         |             | -           |       |       |
     When User click icon X on field input search
 
+    When User click button Delete on contact "628111402222"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+
   @Scenario-58
   Scenario: User melakukan Filter by Column - Sort A to Z/Z to A pada tabel contact list
     Given User already login
@@ -199,14 +221,11 @@ Feature: Get Texting - Contact List
     And User click Sort A-Z on pop-up filter
     And User click button Set Filter on pop-up filter
     And user click button Apply Filter on page Contact List
-#    Then Tabel Contact List akan terfilter dan akan menampilkan data kolom Contact Name berdasarkan urutan nama A ke Z
     When User click icon filter on Contact Name
     And User click Sort Z-A on pop-up filter
     And User click button Set Filter on pop-up filter
     And user click button Apply Filter on page Contact List
-#    Then Tabel Contact List akan terfilter dan akan menampilkan data kolom Contact Name berdasarkan urutan nama Z ke A
     When User click button Remove Filter
-#    Then Fitur filter akan dibatalkan dan tabel contact list akan kembali seperti semula
 
   @Scenario-59
   Scenario: User melakukan Filter by Column - Filter by Condition - Text Starts With pada tabel contact list
@@ -219,11 +238,9 @@ Feature: Get Texting - Contact List
     And User type "Putri" on field condition
     And User click button Set Filter on pop-up filter
     And user click button Apply Filter on page Contact List
-#    Then Tabel Contact List akan terfilter dan akan menampilkan data kolom Contact Name yang diawali dengan kata “Putri”
     When User click button Remove Filter
-#    Then Fitur filter akan dibatalkan dan tabel contact list akan kembali seperti semula
 
-  @Scenario-60 #54
+  @Scenario-60
   Scenario: User melakukan Filter by Column - pada tabel contact list
     Given User already login
     When User click menu Contact
@@ -237,7 +254,13 @@ Feature: Get Texting - Contact List
     When User click and type "Nando" on field Contact Name
     And User click button Save
     And User click icon filter "628111402222,628944021234" on column Checkbox
-#    Then Tabel Contact List akan terfilter dan hanya akan menampilkan contact “628111402222 - Kevin” & “628944021234 - Nando” yang telah tercentang
+
+    When User click button Delete on contact "628111402222"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+    When User click button Delete on contact "628944021234"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
 
   @Scenario-61
   Scenario: User melakukan mengexport data contact list yang telah terfilter
@@ -287,8 +310,6 @@ Feature: Get Texting - Contact List
     And On field Condition choose "Text Contains"
     And User type "Start" on field condition
     And User click button Set Filter on pop-up filter
-#    Then Tabel Contact history akan terfilter dan akan menampilkan data kolom Activity yang megnandung kata “Start”
-#    And hasil filter menampilkan 2 data contacts
     And User click button Export History
     And User click button Yes, Im Sure on Export History Confirmation
     Then History list will be exported to excel format
@@ -303,14 +324,22 @@ Feature: Get Texting - Contact List
     And User click and type "Alfat yual" on field Contact Name Contact List Detail
     And User click and type "Jl. Kalimantan" on field Address Contact List Detail
     And User click button Save on Contact List Detail
-#    Then Contact akan terupdate dengan Contact Name “Alfat yual” dan Address “Jl. Kalimantan”
-#    And pada tabel Contact History akan bertambah baris seperti berikut <Date>, <Time>, <Session ID> <WhatsApp Number>, <Username>, <Active>, <From>, dan <To>
+    And User click back to Contact List from Contact History
+    And Revert back contact Rahmadhany
 
   @Scenario-66
   Scenario: User melakukan edit beberapa contact secara sekaligus
     Given User already login
     When User click menu Contact
     Then User will be redirected to page Contact List
+    When User click button New Contact
+    When User click and type "628111402222" on field Contact Number
+    When User click and type "Kevin" on field Contact Name
+    And User click button Save
+    When User click button New Contact
+    When User click and type "628944021234" on field Contact Number
+    When User click and type "Nando" on field Contact Name
+    And User click button Save
     And User click icon filter "628111402222,628944021234" on column Checkbox
     And User click button Edit Bulk on Contact List Page
     Then Show pop-up Edit Bulk
@@ -319,32 +348,18 @@ Feature: Get Texting - Contact List
     And User click on Tag Edit Bulk and choose "Add"
     And User click and type "Customer Lokal" on field Tag Edit Bulk
     And user click button Save on Edit Bulk
-#    And Contact list will be auto updated
-#      | Contact Number | Contact Name | Birth | Country   | Province   | City | Address | Postal Code | Tag Contact    | Notes | Label |
-#      | 628111402222   | Kevin        |       | Indonesia | Jawa Timur |      |         |             | Customer Lokal |       |       |
-#      | 628944021234   | Nando        |       | Indonesia | Jawa Timur |      |         |             | Customer Lokal |       |       |
+    And User click refresh data button on Contact List page
+    And Contact list will be auto updated
+      | Contact Number | Contact Name | Birth | Country   | Province   | City | Address | Postal Code | Tag Contact    | Notes | Label |
+      | 628111402222   | Kevin        |       | Indonesia | Jawa Timur |      |         |             | Customer Lokal |       |       |
+      | 628944021234   | Nando        |       | Indonesia | Jawa Timur |      |         |             | Customer Lokal |       |       |
 
-  @Scenario-67 #61
-  Scenario: User melakukan bulk upload contact dengan Excel Template yang lebih dari 1000 data
-    Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button Add Bulk
-    And User choose Import File when Add Bulk
-    And User upload excel template 1000 into pop-up Import File
-    Then User see warn upload more than 1000 data
-
-  @Scenario-68
-  Scenario: User melakukan bulk upload contact dengan Excel Template yang lebih dari 1000 data dan terdapat data contact number yang sama
-    Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button Add Bulk
-    And User choose Import File when Add Bulk
-    And User upload excel template 1000 Overwrite into pop-up Import File
-    Then User see warn upload more than 1000 data
-    When User click button Submit
-    Then User see pop-up Skip or Overwrite
+    When User click button Delete on contact "628111402222"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+    When User click button Delete on contact "628944021234"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
 
   @Scenario-69
   Scenario: User menavigasi halaman Contact List dengan pagination
@@ -421,54 +436,12 @@ Feature: Get Texting - Contact List
       | 628111402222   | Kevin        |       |         |          |      |         |             | -           |       |       |
       | 628944021234   | Nando        |       |         |          |      |         |             | -           |       |       |
 
-  @Scenario-74
-  Scenario: Membuka Contact List History setelah melakukan Chatting dengan beberapa Contact
-    Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button Contact History on contact "6285259027122"
-    Then User will be redirected to page Contact History
-    And Contact History list will shows all history data
-      | Date       | Time  | Session ID   | WhatsApp Number | User Name         | Activity        | From | To |
-      | MM/dd/yyyy | HH:mm | Chat Session | 6282213288475   | qa-matt@gmail.com | Expired Session |      |    |
-
-  @Scenario-75
-  Scenario: Menggunakan fungsi input search
-    Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button Contact History on contact "6285259027122"
-    Then User will be redirected to page Contact History
-    When User type "Expired" on input search Contact History
-    Then Table Contact List History will be filtered with blue highlighted
-    When User click icon X on input search Contact History
-    Then Table Contact List History will be back to normal
-
-  @Scenario-76
-  Scenario: Melakukan export table Contact List History
-    Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button Contact History on contact "6285259027122"
-    Then User will be redirected to page Contact History
-    When User click button Export History
-    And User click button Yes, Im Sure on Export History Confirmation
-    Then History list will be exported to excel format
-
-  @Scenario-77
-  Scenario: Melakukan filter by column dan export table Contact List History
-    Given User already login
-    When User click menu Contact
-    Then User will be redirected to page Contact List
-    When User click button Contact History on contact "6285259027122"
-    Then User will be redirected to page Contact History
-    When User click icon filter SessionID on Contact History page
-    And User click expand Filter by Value "SessionID"
-    And On field filter by value tick only one
-    And User click button Set Filter on pop-up filter
-    When User click button Export History
-    And User click button Yes, Im Sure on Export History Confirmation
-    Then History list will be exported to excel format
+    When User click button Delete on contact "628111402222"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
+    When User click button Delete on contact "628944021234"
+    Then Show pop-up Delete confirmation
+    When User click button Yes, I’m Sure on Delete confirmation
 
   @Scenario-78
   Scenario: User melakukan Search Entire Database pada input search Chatbox

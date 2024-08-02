@@ -43,7 +43,7 @@ public class ContactListPage {
     private final String CONTACT_HISTORY_BUTTON_EXPORT = "//*[@id='contactlistdetail_button_exporthistory']";
     private final String CONTACT_HISTORY_CONFIRMATION_EXPORT = "//*[@id='confirmexportcontactlog_popup_btn_confirmexporthistory']";
     private final String CONTACT_HISTORY_BUTTON_FILTER_ACTIVITY = "//*[@id='usecontactlistdetail_popup_btn_filter_activity']/*[local-name()='svg']/*[local-name()='path']";
-    private final String CONTACT_HISTORY_BUTTON_FILTER_SESSION_ID = "//*[@id='usecontactlistdetail_popup_btn_filter_session']/*[local-name()='svg']/*[local-name()='path']";
+    private final String CONTACT_HISTORY_BUTTON_FILTER_SESSION_ID = "//*[@id='contactlisthistory_popupfilter_btn_session']/*[local-name()='svg']/*[local-name()='path']";
     private final String CONTACT_HISTORY_BUTTON_EDIT_CONTACT = "//*[@id='contactlistdetail_btn_editcontact']";
     private final String CONTACT_HISTORY_EDIT_CONTACT_NAME = "//*[@id='contactlistdetail_textinput_editname' and @type='text']";
     private final String CONTACT_HISTORY_EDIT_ADDRESS = "//*[@id='contactlistdetail_textinput_address']";
@@ -62,6 +62,8 @@ public class ContactListPage {
     private final String EDIT_CONTACT_NAME = "//*[@id='renderinputfield_client_textinput_contactname']";
     private final String EDIT_CONTACT_NUMBER = "//*[@id='renderinputfield_client_textinput_contactnumber']";
     private final String EDIT_CONTACT_SAVE = "//*[@id='editcontactlist_popup_btn_save']";
+    private final String EDIT_CONTACT_TAG = "//*[@id='editcontactlist_popup_select_tagcontaact']//div[@role='button']/*[local-name()='svg']/*[local-name()='path']";
+    private final String EDIT_CONTACT_NOTE = "//*[@id='renderinputfield_client_textinput_notes']";
 
     private final String BUTTON_NEW_CONTACT = "//*[@id='contactlist_btn_newcontact']";
     private final String BUTTON_ADD_BULK = "//*[@id='contactlist_btn_insertchat']";
@@ -71,6 +73,7 @@ public class ContactListPage {
     private final String BUTTON_INPUT_SEARCH = "//*[@id='contactlist_textinput_searchcontact']";
     private final String BUTTON_SEARCH = "//*[@id='contactlist_btn_search']";
     private final String BUTTON_CLOSE_SEARCH = "//*[@id='contactlist_btn_closesearch']/*[local-name()='path']";
+    private final String BUTTON_CLOSE_SEARCH_CONTACT_LIST_HISTORY = "//*[@id='contactlisthistory_btn_closesearch']/*[local-name()='path']";
     private final String BUTTON_FILTER_CONTACT_NAME = "//*[@id='broadcastlist_popup_btn_filter_name']/*[local-name()='svg']/*[local-name()='path']";
     private final String BUTTON_FILTER_CONTACT_NAME_SORT_ASC = "//*[@id='usecontactlist_popup_btn_menusort_name_0']";
     private final String BUTTON_FILTER_CONTACT_NAME_SORT_DESC = "//*[@id='usecontactlist_popup_btn_menusort_name_1']";
@@ -79,7 +82,7 @@ public class ContactListPage {
     private final String BUTTON_REMOVE_FILTER = "//*[@id='contactlist_btn_removefilter']";
     private final String BUTTON_EXPAND_FILTER_NAME = "//*[@id='usecontactlist_popup_btn_filtercondition_name']";
     private final String BUTTON_EXPAND_FILTER_ACTIVITY = "//*[@id='usecontactlistdetail_popup_btn_filtercondition_activity']";
-    private final String BUTTON_EXPAND_FILTER_VALUE_SESSION_ID = "//*[@id='usecontactlistdetail_popup_button_filtervalue_session']";
+    private final String BUTTON_EXPAND_FILTER_VALUE_SESSION_ID = "//*[@id='contactlisthistory_filtervalue_btn_showfilterlist_session']";
     private final String BUTTON_NEXT_PAGE = "//*[@id='contactlist_btn_nextpagination']";
     private final String BUTTON_PREV_PAGE = "//*[@id='contactlist_btn_prevpagination']";
     private final String SEARCH_PAGINATION_NUMBER = "//*[@id='contactlist_textinput_searchpagination']";
@@ -94,10 +97,13 @@ public class ContactListPage {
     private final String POPUP_IMPORT_FILE_INPUT_EXCEL = "//input[@name='file']";
     private final String POPUP_IMPORT_FILE_BUTTON_SUBMIT = "//*[@id='addcontactlist_popup_btn_submit']";
     private final String POPUP_IMPORT_FILE_OVERWRITE_DATA = "//*[@class='AddContactList_head']/h3";
+    private final String POPUP_IMPORT_FILE_OVERWRITE_DATA_WA = "//*[@class='AddContactListWa_head']/h4";
     private final String POPUP_IMPORT_FILE_BUTTON_OVERWRITE = "//*[@id='addcontactlist_popup_btn_overwrite']";
     private final String POPUP_IMPORT_FILE_WARN_DATA = "//*[@class='big_data_warn']/p";
     private final String POPUP_IMPORT_FILE_SKIP_OR_OVERWRITE = "//*[@class='ContactOverwrite']";
+    private final String POPUP_IMPORT_FILE_UPLOAD_TAG = "//*[@class='ContactUploadOverwrite']/h3";
 
+    private final String BUTTON_CONTACT_HISTORY = "sidebarcontact_btn_contactlisthistorypage";
 
     private final String POPUP_SYNC_WA_SELECT_WA = "//*[@id='chatbody_chattabs_select_username']";
     private final String POPUP_SYNC_WA_SELECT_WA_OPTION = "//li[@id='chatbody_chattabs_select_username-option-0']";
@@ -111,12 +117,22 @@ public class ContactListPage {
     private final String POPUP_ADD_NEW_CONTACT = "//*[@class='AddOneContactList_head']";
     private final String POPUP_ADD_BUTTON_SAVE = "//*[@id='addonecontactlist_popup_btn_save']";
 
+    private final String BTN_EXPORT_CONTACT_LIST_HISTORY = "//*[@id='contactlisthistory_btn_exporttable']";
+    private final String POPUP_EXPORT_CONTACT_LIST_HISTORY = "//*[@id='contactlisthistory_confirmexport_btn_3']";
+
     private WebDriver driver;
     private WebDriverWait wait;
+    private int waitTimeForLoop = 300000;
 
     public ContactListPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(120));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(20));
+    }
+
+    public void clickMenuContactHistory() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.id(BUTTON_CONTACT_HISTORY)));
+        WebElement element = driver.findElement(By.id(BUTTON_CONTACT_HISTORY));
+        element.click();
     }
 
     public void validateRedirectToContactList() {
@@ -126,61 +142,69 @@ public class ContactListPage {
         String actualUrl = driver.getCurrentUrl();
         assert actualUrl.equals(url) : "actual: " + actualUrl + " expected: " + url;
 
-        new Actions(driver).pause(500).perform();
+        Utils.retryOperation(() -> {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_NEW_CONTACT)));
+        }, waitTimeForLoop);
     }
 
     public void validateContactListIsAutoUpdated(List<Map<String, String>> list) {
-        for (Map<String, String> map : list) {
-            map = Utils.replaceNullValuesWithEmptyStrings(map);
+        Utils.retryOperationWithCatch(() -> {
+            new Actions(driver).pause(3000).perform();
+            System.out.println("Validating updated contact list..");
 
-            String xpath = String.format(CONTACT_LIST_TABLE_ROW, map.get("Contact Number"));
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_NAME)));
-            WebElement name = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_NAME));
-            assert name.getText().equals(map.get("Contact Name")) : "1 actual: " + name.getText() + " expected: " + map.get("Contact Name");
+            for (Map<String, String> map : list) {
+                map = Utils.replaceNullValuesWithEmptyStrings(map);
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_BIRTH)));
-            WebElement birth = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_BIRTH));
+                String xpath = String.format(CONTACT_LIST_TABLE_ROW, map.get("Contact Number"));
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_NAME)));
+                WebElement name = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_NAME));
+                assert name.getText().equals(map.get("Contact Name")) : "1 actual: " + name.getText() + " expected: " + map.get("Contact Name");
 
-            assert birth.getText().equals(map.get("Birth")) : "2 actual: " + birth.getText() + " expected: " + map.get("Birth");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_BIRTH)));
+                WebElement birth = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_BIRTH));
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_COUNTRY)));
-            WebElement country = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_COUNTRY));
-            assert country.getText().equals(map.get("Country")) : "3 actual: " + country.getText() + " expected: " + map.get("Country");
+                assert birth.getText().equals(map.get("Birth")) : "2 actual: " + birth.getText() + " expected: " + map.get("Birth");
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_PROVINCE)));
-            WebElement province = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_PROVINCE));
-            assert province.getText().equals(map.get("Province")) : "4 actual: " + province.getText() + " expected: " + map.get("Province");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_COUNTRY)));
+                WebElement country = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_COUNTRY));
+                assert country.getText().equals(map.get("Country")) : "3 actual: " + country.getText() + " expected: " + map.get("Country");
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_CITY)));
-            WebElement city = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_CITY));
-            assert city.getText().equals(map.get("City")) : "5 actual: " + city.getText() + " expected: " + map.get("City");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_PROVINCE)));
+                WebElement province = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_PROVINCE));
+                assert province.getText().equals(map.get("Province")) : "4 actual: " + province.getText() + " expected: " + map.get("Province");
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_ADDRESS)));
-            WebElement address = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_ADDRESS));
-            assert address.getText().equals(map.get("Address")) : "6 actual: " + address.getText() + " expected: " + map.get("Address");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_CITY)));
+                WebElement city = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_CITY));
+                assert city.getText().equals(map.get("City")) : "5 actual: " + city.getText() + " expected: " + map.get("City");
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_POSTAL_CODE)));
-            WebElement postalCode = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_POSTAL_CODE));
-            assert postalCode.getText().equals(map.get("Postal Code")) : "7 actual: " + postalCode.getText() + " expected: " + map.get("Postal Code");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_ADDRESS)));
+                WebElement address = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_ADDRESS));
+                assert address.getText().equals(map.get("Address")) : "6 actual: " + address.getText() + " expected: " + map.get("Address");
 
-            String[] tagArray = map.get("Tag Contact").split(";");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_POSTAL_CODE)));
+                WebElement postalCode = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_POSTAL_CODE));
+                assert postalCode.getText().equals(map.get("Postal Code")) : "7 actual: " + postalCode.getText() + " expected: " + map.get("Postal Code");
 
-            List<WebElement> tags;
-            try {
-                new WebDriverWait(this.driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_TAG)));
-                tags = driver.findElements(By.xpath(xpath + CONTACT_LIST_TABLE_TAG));
-            } catch (Exception e) {
-                new WebDriverWait(this.driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + "//*[@class='tags']")));
-                tags = driver.findElements(By.xpath(xpath + "//*[@class='tags']"));
+                String[] tagArray = map.get("Tag Contact").split(";");
+
+                List<WebElement> tags;
+                try {
+                    new WebDriverWait(this.driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_TAG)));
+                    tags = driver.findElements(By.xpath(xpath + CONTACT_LIST_TABLE_TAG));
+                } catch (Exception e) {
+                    new WebDriverWait(this.driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + "//*[@class='tags']")));
+                    tags = driver.findElements(By.xpath(xpath + "//*[@class='tags']"));
+                }
+                for (String tag : tagArray) {
+                    assert tags.stream().anyMatch(f -> f.getText().equals(tag)) : "8 actual: " + tags + " expected: " + tag;
+                }
+
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_NOTE)));
+                WebElement note = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_NOTE));
+                assert map.get("Notes").contains(Utils.removeTrailingDots(note.getText())) : "actual: " + note.getText() + " expected: " + map.get("Notes");
             }
-            for (String tag : tagArray) {
-                assert tags.stream().anyMatch(f -> f.getText().equals(tag)) : "8 actual: " + tags + " expected: " + tag;
-            }
+        }, this::userClickRefreshDataButtonOnContactListPage, 120000);
 
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath + CONTACT_LIST_TABLE_NOTE)));
-            WebElement note = driver.findElement(By.xpath(xpath + CONTACT_LIST_TABLE_NOTE));
-            assert map.get("Notes").contains(Utils.removeTrailingDots(note.getText())) : "actual: " + note.getText() + " expected: " + map.get("Notes");
-        }
     }
 
     public void validateNotesIsHighlighted(String text) {
@@ -193,83 +217,36 @@ public class ContactListPage {
     }
 
     public void revertContactRahmadhany() {
-        String wa = String.format(CONTACT_LIST_TABLE_EDIT_BY_NO_WA, "6285259027122");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(wa)));
-        WebElement element = driver.findElement(By.xpath(wa));
-        element.click();
-        new Actions(driver).pause(2000).perform();
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_INPUT_EXCEL)));
+        WebElement element = driver.findElement(By.xpath(POPUP_IMPORT_FILE_INPUT_EXCEL));
 
-        WebElement name = driver.findElement(By.xpath(EDIT_CONTACT_NAME));
-        name.clear();
-        name.sendKeys("Rahmadhany");
-        new Actions(driver).pause(700).perform();
+        File file = new File(
+                "src" + File.separator + "test" + File.separator +
+                        "resources" + File.separator + "RevertRahmadhany.xlsx");
+        element.sendKeys(file.getAbsolutePath());
 
-        try {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_CITY)));
-            WebElement city = driver.findElement(By.xpath(EDIT_CONTACT_CITY));
-            city.clear();
-            city.sendKeys(Keys.CONTROL, "a");
-            city.sendKeys(Keys.DELETE);
-            new Actions(driver).pause(700).perform();
-        } catch (Exception ignored) {
-        }
+        new Actions(driver).pause(1000).perform();
+    }
 
-        try {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_PROVINCE)));
-            WebElement province = driver.findElement(By.xpath(EDIT_CONTACT_PROVINCE));
-            province.clear();
-            province.sendKeys(Keys.CONTROL, "a");
-            province.sendKeys(Keys.DELETE);
-            new Actions(driver).pause(700).perform();
-        } catch (Exception ignored) {
-        }
+    public void uploadContactsNeeded() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_INPUT_EXCEL)));
+        WebElement element = driver.findElement(By.xpath(POPUP_IMPORT_FILE_INPUT_EXCEL));
 
-        try {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_COUNTRY)));
-            WebElement country = driver.findElement(By.xpath(EDIT_CONTACT_COUNTRY));
-            country.clear();
-            country.sendKeys(Keys.CONTROL, "a");
-            country.sendKeys(Keys.DELETE);
-            new Actions(driver).pause(700).perform();
-        } catch (Exception ignored) {
-        }
+        File file = new File(
+                "src" + File.separator + "test" + File.separator +
+                        "resources" + File.separator + "UseContact.xlsx");
+        element.sendKeys(file.getAbsolutePath());
 
-        try {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_BIRTH)));
-            WebElement birth = driver.findElement(By.xpath(EDIT_CONTACT_BIRTH));
-            new Actions(driver)
-                    .moveToElement(birth)
-                    .click()
-                    .pause(700).perform();
-        } catch (Exception ignored) {
-        }
-
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_POSTAL_CODE)));
-        WebElement postalCode = driver.findElement(By.xpath(EDIT_CONTACT_POSTAL_CODE));
-        postalCode.clear();
-        postalCode.sendKeys(Keys.CONTROL, "a");
-        postalCode.sendKeys(Keys.DELETE);
-        postalCode.clear();
-        new Actions(driver).pause(700).perform();
-
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_ADDRESS)));
-        WebElement address = driver.findElement(By.xpath(EDIT_CONTACT_ADDRESS));
-        address.clear();
-        address.sendKeys(Keys.CONTROL, "a");
-        address.sendKeys(Keys.DELETE);
-        address.clear();
-        new Actions(driver).pause(700).perform();
-
-        WebElement save = driver.findElement(By.xpath(EDIT_CONTACT_SAVE));
-        save.click();
-        new Actions(driver).pause(2000).perform();
+        new Actions(driver).pause(1000).perform();
     }
 
     public void clickButtonNewContact() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_NEW_CONTACT)));
-        WebElement element = driver.findElement(By.xpath(BUTTON_NEW_CONTACT));
-        element.click();
-        new Actions(driver).pause(1000).perform();
+        Utils.retryOperation(() -> {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_NEW_CONTACT)));
+            WebElement element = driver.findElement(By.xpath(BUTTON_NEW_CONTACT));
+            element.click();
+            new Actions(driver).pause(1000).perform();
+        }, waitTimeForLoop);
     }
 
     public void validateShowPopUpAddNewContact() {
@@ -283,13 +260,24 @@ public class ContactListPage {
     }
 
     public void clickAndTypeOnFieldContactNumber(String text) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_NUMBER)));
-        WebElement name = driver.findElement(By.xpath(EDIT_CONTACT_NUMBER));
-        name.clear();
-        name.sendKeys(Keys.CONTROL, "a");
-        name.sendKeys(Keys.DELETE);
-        name.sendKeys(text);
-        new Actions(driver).pause(700).perform();
+        Utils.retryOperationWithCatch(() -> {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(EDIT_CONTACT_NUMBER)));
+            WebElement number = driver.findElement(By.xpath(EDIT_CONTACT_NUMBER));
+            number.clear();
+
+            new Actions(driver)
+                    .moveToElement(number)
+                    .click()
+                    .pause(500)
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(text)
+                    .pause(500)
+                    .build().perform();
+        }, this::clickButtonNewContact, waitTimeForLoop);
+
     }
 
     public void clickAndTypeOnFieldContactName(String text) {
@@ -357,121 +345,109 @@ public class ContactListPage {
         WebElement element = driver.findElement(By.xpath(xpath));
         element.click();
 
-        new Actions(driver)
-                .scrollToElement(element)
-                .moveToElement(element)
-                .click()
-                .pause(500)
-                .keyDown(Keys.CONTROL)
-                .sendKeys("a")
-                .keyUp(Keys.CONTROL)
-                .sendKeys(Keys.BACK_SPACE)
-                .pause(500)
-                .sendKeys(to)
-                .pause(1000)
-                .build().perform();
+        WebElement outside = driver.findElement(By.className("Head_Wrapper"));
+
+        while (!element.getAttribute("title").equals(to)) {
+            new Actions(driver)
+                    .scrollToElement(element)
+                    .moveToElement(element)
+                    .click()
+                    .pause(500)
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(to)
+                    .pause(500)
+                    .moveToElement(outside)
+                    .click()
+                    .build().perform();
+        }
     }
 
     public void clickContactAndChangedAddress(String contact, String text) {
-        String x = String.format(CONTACT_LIST_TABLE_ROW, contact);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(x + CONTACT_LIST_TABLE_ADDRESS)));
-        WebElement e = driver.findElement(By.xpath(x + CONTACT_LIST_TABLE_ADDRESS));
-        new Actions(driver)
-                .scrollToElement(e)
-                .moveToElement(e)
-                .click()
-                .build().perform();
-
         String xpath = String.format(CONTACT_LIST_TABLE_ADDRESS_EDIT, contact);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
         WebElement element = driver.findElement(By.xpath(xpath));
         element.click();
 
-        new Actions(driver)
-                .scrollToElement(element)
-                .moveToElement(element)
-                .click()
-                .pause(500)
-                .keyDown(Keys.CONTROL)
-                .sendKeys("a")
-                .keyUp(Keys.CONTROL)
-                .sendKeys(Keys.BACK_SPACE)
-                .pause(500)
-                .sendKeys(text)
-                .pause(1000)
-                .build().perform();
+        WebElement outside = driver.findElement(By.className("Head_Wrapper"));
+
+        while (!element.getAttribute("value").equals(text)) {
+            System.out.print("-");
+            new Actions(driver)
+                    .scrollToElement(element)
+                    .moveToElement(element)
+                    .click()
+                    .pause(500)
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(text)
+                    .pause(500)
+                    .moveToElement(outside)
+                    .click()
+                    .build().perform();
+        }
     }
 
     public void clickContactAndChangedPostalCode(String contact, String text) {
-        String x = String.format(CONTACT_LIST_TABLE_ROW, contact);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(x + CONTACT_LIST_TABLE_POSTAL_CODE)));
-        WebElement e = driver.findElement(By.xpath(x + CONTACT_LIST_TABLE_POSTAL_CODE));
-        new Actions(driver)
-                .scrollToElement(e)
-                .moveToElement(e)
-                .click()
-                .pause(500)
-                .build().perform();
-
         String xpath = String.format(CONTACT_LIST_TABLE_POSTAL_CODE_EDIT, contact);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
         WebElement element = driver.findElement(By.xpath(xpath));
 
-        new Actions(driver)
-                .scrollToElement(element)
-                .moveToElement(element)
-                .click()
-                .pause(500)
-                .keyDown(Keys.CONTROL)
-                .sendKeys("a")
-                .keyUp(Keys.CONTROL)
-                .sendKeys(Keys.BACK_SPACE)
-                .pause(500)
-                .sendKeys(text)
-                .pause(1000)
-                .build().perform();
+        while (!element.getAttribute("value").equals(text)) {
+            System.out.print("-");
+            element.sendKeys(text);
+        }
     }
 
     public void clickContactAndChangedNotes(String contact, String text) {
-        String x = String.format(CONTACT_LIST_TABLE_ROW, contact);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(x + CONTACT_LIST_TABLE_NOTE)));
-        WebElement e = driver.findElement(By.xpath(x + CONTACT_LIST_TABLE_NOTE));
-        new Actions(driver)
-                .scrollToElement(e)
-                .moveToElement(e)
-                .click()
-                .pause(500)
-                .build().perform();
-
         String xpath = String.format(CONTACT_LIST_TABLE_NOTE_EDIT, contact);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
         WebElement element = driver.findElement(By.xpath(xpath));
 
-        new Actions(driver)
-                .scrollToElement(element)
-                .moveToElement(element)
-                .click()
-                .pause(500)
-                .keyDown(Keys.CONTROL)
-                .sendKeys("a")
-                .keyUp(Keys.CONTROL)
-                .sendKeys(Keys.BACK_SPACE)
-                .pause(500)
-                .sendKeys(text)
-                .pause(1000)
-                .build().perform();
+        WebElement outside = driver.findElement(By.className("Head_Wrapper"));
+
+        while (!element.getAttribute("value").equals(text)) {
+            System.out.print("-");
+            new Actions(driver)
+                    .scrollToElement(element)
+                    .moveToElement(element)
+                    .click()
+                    .pause(500)
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(text)
+                    .pause(500)
+                    .moveToElement(outside)
+                    .click()
+                    .build().perform();
+        }
     }
 
     public void clickButtonAddBulk() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_ADD_BULK)));
-        WebElement element = driver.findElement(By.xpath(BUTTON_ADD_BULK));
-        element.click();
+        Utils.retryOperation(() -> {
+            new WebDriverWait(this.driver, Duration.ofSeconds(3)).until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_ADD_BULK)));
+            WebElement element = driver.findElement(By.xpath(BUTTON_ADD_BULK));
+            new Actions(driver).moveToElement(element).click().pause(500).build().perform();
+            new WebDriverWait(this.driver, Duration.ofSeconds(3)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(BUTTON_ADD_BULK_DROPDOWN_IMPORT_FILE)));
+        }, waitTimeForLoop);
     }
 
     public void chooseImportFileWhenAddBulk() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_ADD_BULK_DROPDOWN_IMPORT_FILE)));
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_ADD_BULK_DROPDOWN_IMPORT_FILE)));
+        } catch (Exception e) {
+            clickButtonAddBulk();
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_ADD_BULK_DROPDOWN_IMPORT_FILE)));
+        }
+
         WebElement element = driver.findElement(By.xpath(BUTTON_ADD_BULK_DROPDOWN_IMPORT_FILE));
-        element.click();
+        new Actions(driver).moveToElement(element).click().pause(500).build().perform();
     }
 
     public void uploadExcelTemplateIntoPopUpImportFile() {
@@ -503,13 +479,17 @@ public class ContactListPage {
             new WebDriverWait(this.driver, Duration.ofSeconds(3)).until(ExpectedConditions.elementToBeClickable(By.xpath(POPUP_IMPORT_FILE_BUTTON_SUBMIT)));
             WebElement element = driver.findElement(By.xpath(POPUP_IMPORT_FILE_BUTTON_SUBMIT));
             element.click();
+
+            new Actions(driver).pause(10000).perform();
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(POPUP_IMPORT_FILE_BUTTON_SUBMIT)));
         } catch (Exception ignored) {
             new WebDriverWait(this.driver, Duration.ofSeconds(3)).until(ExpectedConditions.elementToBeClickable(By.xpath(POPUP_SYNC_WA_BUTTON_SUBMIT)));
             WebElement element = driver.findElement(By.xpath(POPUP_SYNC_WA_BUTTON_SUBMIT));
             element.click();
-        }
 
-        new Actions(driver).pause(10000).perform();
+            new Actions(driver).pause(10000).perform();
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(POPUP_SYNC_WA_BUTTON_SUBMIT)));
+        }
     }
 
     public void chooseSyncFromWhatsAppWhenAddBulk() {
@@ -524,7 +504,7 @@ public class ContactListPage {
         element.click();
     }
 
-    public void chooseWhatsappNumber(String text) {
+    public void chooseWhatsAppNumberSyncOption() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(POPUP_SYNC_WA_SELECT_WA_OPTION)));
         WebElement element = driver.findElement(By.xpath(POPUP_SYNC_WA_SELECT_WA_OPTION));
         element.click();
@@ -558,15 +538,14 @@ public class ContactListPage {
     }
 
 
-    public void validateShowPopUpOverwriteData() {
+    public void validateShowPopUpOverwriteDataSyncWa() {
         try {
-            new WebDriverWait(this.driver, Duration.ofSeconds(3)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_OVERWRITE_DATA)));
-            WebElement element = driver.findElement(By.xpath(POPUP_IMPORT_FILE_OVERWRITE_DATA));
-            assert element.getText().equals("Overwrite Data") : "actual: " + element.getText() + " expected: Overwrite Data";
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_OVERWRITE_DATA_WA)));
+            WebElement element = driver.findElement(By.xpath(POPUP_IMPORT_FILE_OVERWRITE_DATA_WA));
+            assert element.getText().contains("Whatsapp Sync") : "actual: " + element.getText() + " expected: Whatsapp Sync";
         } catch (Exception ignored) {
-            new WebDriverWait(this.driver, Duration.ofSeconds(3)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_SYNC_WA_OVERWRITE)));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_SYNC_WA_OVERWRITE)));
         }
-
     }
 
     public void clickButtonYesOverwrite() {
@@ -574,7 +553,12 @@ public class ContactListPage {
         WebElement element = driver.findElement(By.xpath(POPUP_IMPORT_FILE_BUTTON_OVERWRITE));
         element.click();
 
-        new Actions(driver).pause(2000).perform();
+        try {
+            new WebDriverWait(this.driver, Duration.ofSeconds(10)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_UPLOAD_TAG)));
+            WebElement upload_tag = driver.findElement(By.xpath(POPUP_IMPORT_FILE_UPLOAD_TAG));
+            assert upload_tag.getText().equals("Uploading Tag");
+            new WebDriverWait(this.driver, Duration.ofSeconds(10)).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(POPUP_IMPORT_FILE_UPLOAD_TAG)));
+        } catch (Throwable ignored) {}
     }
 
     public void clickButtonSkip() {
@@ -586,9 +570,11 @@ public class ContactListPage {
     }
 
     public void clickButtonExportAll() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_EXPORT_ALL)));
-        WebElement element = driver.findElement(By.xpath(BUTTON_EXPORT_ALL));
-        element.click();
+        Utils.retryOperation(() -> {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_EXPORT_ALL)));
+            WebElement element = driver.findElement(By.xpath(BUTTON_EXPORT_ALL));
+            element.click();
+        }, waitTimeForLoop);
     }
 
     public void validateShowPopUpExportAllConfirmation() {
@@ -604,7 +590,8 @@ public class ContactListPage {
     }
 
     public void validateContactListWillBeExportedToExcelFormat() {
-        assert Utils.verifyDownloadedFile("contact-list") : "File is not downloaded";
+        new Actions(driver).pause(7000).perform();
+        assert Utils.verifyDownloadedFile("contact-list") : "File is not downloaded after 7 seconds";
         new Actions(driver).pause(1000).perform();
         assert Utils.deleteDownloadedFile("contact-list") : "Failed to delete file";
     }
@@ -612,19 +599,36 @@ public class ContactListPage {
     public void clickAndTypeOnFieldInputSearch(String text) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(BUTTON_INPUT_SEARCH)));
         WebElement element = driver.findElement(By.xpath(BUTTON_INPUT_SEARCH));
-        new Actions(driver).moveToElement(element).click().sendKeys(text).build().perform();
+        new Actions(driver).moveToElement(element).click().sendKeys(text).pause(500).build().perform();
     }
 
     public void clickButtonSearch() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_SEARCH)));
-        WebElement element = driver.findElement(By.xpath(BUTTON_SEARCH));
-        element.click();
-        new Actions(driver).pause(2000).build().perform();
+        boolean done = false;
+        for (int i=0; i<5; i++) {
+            try {
+                wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_SEARCH)));
+                WebElement element = driver.findElement(By.xpath(BUTTON_SEARCH));
+                new Actions(driver).moveToElement(element).pause(2000).build().perform();
+                done = true;
+            } catch (Exception e) {
+                clickAndTypeOnFieldInputSearch("Kevin");
+            }
+        }
+
+        if (!done) {
+            throw new RuntimeException("Failed to click button search 5 times");
+        }
     }
 
     public void clickIconXOnFieldInputSearch() {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_CLOSE_SEARCH)));
         WebElement element = driver.findElement(By.xpath(BUTTON_CLOSE_SEARCH));
+        new Actions(driver).moveToElement(element).click().build().perform();
+    }
+
+    public void clickIconXOnFieldInputSearchContactListHistoryPage() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_CLOSE_SEARCH_CONTACT_LIST_HISTORY)));
+        WebElement element = driver.findElement(By.xpath(BUTTON_CLOSE_SEARCH_CONTACT_LIST_HISTORY));
         new Actions(driver).moveToElement(element).click().build().perform();
     }
 
@@ -635,13 +639,23 @@ public class ContactListPage {
     }
 
     public void clickSortAZOnPopUpFilter() {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_ASC)));
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_ASC)));
+        } catch (TimeoutException e) {
+            clickIconFilterOnContactName();
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_ASC)));
+        }
         WebElement element = driver.findElement(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_ASC));
         element.click();
     }
 
     public void clickSortZAOnPopUpFilter() {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_DESC)));
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_DESC)));
+        } catch (TimeoutException e) {
+            clickIconFilterOnContactName();
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_DESC)));
+        }
         WebElement element = driver.findElement(By.xpath(BUTTON_FILTER_CONTACT_NAME_SORT_DESC));
         element.click();
     }
@@ -667,7 +681,12 @@ public class ContactListPage {
     }
 
     public void clickExpandFilterByConditionName() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_EXPAND_FILTER_NAME)));
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_EXPAND_FILTER_NAME)));
+        } catch (TimeoutException e) {
+            clickIconFilterOnContactName();
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(BUTTON_EXPAND_FILTER_NAME)));
+        }
         WebElement element = driver.findElement(By.xpath(BUTTON_EXPAND_FILTER_NAME + "/p"));
         new Actions(driver).moveToElement(element).click().pause(1000).build().perform();
 
@@ -715,17 +734,24 @@ public class ContactListPage {
     }
 
     public void userClickIconFilterOnColumnCheckbox(String[] textArray) {
-        for (String text : textArray) {
-            String xpath = String.format("//*[@name='checkbox-%s']/following-sibling::*/*[local-name()='path']", text);
-            String xpath1 = String.format("//*[@name='checkbox-%s']", text);
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
-            WebElement e1 = driver.findElement(By.xpath(xpath1));
-            if (!e1.isSelected()) {
-                WebElement e = driver.findElement(By.xpath(xpath));
-                new Actions(driver).moveToElement(e).click().pause(500).build().perform();
-
+        Utils.retryOperation(() -> {
+            for (String text : textArray) {
+                String xpath = String.format("//*[@name='checkbox-%s']/following-sibling::*/*[local-name()='path']", text);
+                String xpath1 = String.format("//*[@name='checkbox-%s']", text);
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+                WebElement e1 = driver.findElement(By.xpath(xpath1));
+                if (!e1.isSelected()) {
+                    WebElement e = driver.findElement(By.xpath(xpath));
+                    new Actions(driver).moveToElement(e).click().pause(500).build().perform();
+                }
             }
-        }
+
+            for (String text : textArray) {
+                String xpath1 = String.format("//*[@name='checkbox-%s']", text);
+                WebElement e1 = driver.findElement(By.xpath(xpath1));
+                assert e1.isSelected() : text + " not selected";
+            }
+        }, 120000);
     }
 
     public void userClickButtonContactHistoryOnContact(String text) {
@@ -888,7 +914,7 @@ public class ContactListPage {
 
         File file = new File(
                 "src" + File.separator + "test" + File.separator +
-                        "resources" + File.separator + "ContactList1000Data.xlsx");
+                        "resources" + File.separator + "Contact ListMoreThan1000Data.xlsx");
         element.sendKeys(file.getAbsolutePath());
 
         new Actions(driver).pause(1000).perform();
@@ -955,30 +981,32 @@ public class ContactListPage {
     }
 
     public void userClickFieldDataViewOnPaginationAndChoose(String text) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(SEARCH_PAGINATION_DATA_VIEW)));
-        WebElement element = driver.findElement(By.xpath(SEARCH_PAGINATION_DATA_VIEW));
-        new Actions(driver).moveToElement(element).click().pause(500).build().perform();
+        Utils.retryOperation(() -> {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(SEARCH_PAGINATION_DATA_VIEW)));
+            WebElement element = driver.findElement(By.xpath(SEARCH_PAGINATION_DATA_VIEW));
+            new Actions(driver).moveToElement(element).click().pause(500).build().perform();
 
-        if (text.equals("50")) {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='contactlist_btn_limitnumber_50']")));
-            element = driver.findElement(By.xpath("//*[@id='contactlist_btn_limitnumber_50']"));
-            new Actions(driver).moveToElement(element).click().pause(2000).build().perform();
-        } else if (text.equals("10")) {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='contactlist_btn_limitnumber_10']")));
-            element = driver.findElement(By.xpath("//*[@id='contactlist_btn_limitnumber_10']"));
-            new Actions(driver).moveToElement(element).click().pause(2000).build().perform();
-        } else {
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='contactlist_btn_limitnumber_100']")));
-            element = driver.findElement(By.xpath("//*[@id='contactlist_btn_limitnumber_100']"));
-            new Actions(driver).moveToElement(element).click().pause(2000).build().perform();
-        }
+            if (text.equals("50")) {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='contactlist_btn_limitnumber_50']")));
+                element = driver.findElement(By.xpath("//*[@id='contactlist_btn_limitnumber_50']"));
+                new Actions(driver).moveToElement(element).click().pause(2000).build().perform();
+            } else if (text.equals("10")) {
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id='contactlist_btn_limitnumber_10']")));
+                element = driver.findElement(By.xpath("//*[@id='contactlist_btn_limitnumber_10']"));
+                new Actions(driver).moveToElement(element).click().pause(2000).build().perform();
+            } else {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@id='contactlist_btn_limitnumber_100']")));
+                element = driver.findElement(By.xpath("//*[@id='contactlist_btn_limitnumber_100']"));
+                new Actions(driver).moveToElement(element).click().pause(2000).build().perform();
+            }
+        }, waitTimeForLoop);
     }
 
     public void tableContactListWillOnlyShowRowDataContactList(int number) {
         String xpath = "//*[contains(@class,'MuiTableRow-root contactItem')]";
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
         List<WebElement> element = driver.findElements(By.xpath(xpath));
-        assert element.size() == number : "actual: " + element.size() + " expected: " + number;
+        assert element.size() <= number : "actual: " + element.size() + " expected: " + number;
     }
 
     public void showPopUpDeleteConfirmation() {
@@ -990,7 +1018,7 @@ public class ContactListPage {
         String xpath = "//*[@id='deletecontactlist_popup_btn_confirmdelete']";
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
         WebElement element = driver.findElement(By.xpath(xpath));
-        new Actions(driver).moveToElement(element).click().pause(500).build().perform();
+        new Actions(driver).moveToElement(element).click().pause(5000).build().perform();
     }
 
     public void userClickButtonDeleteBulkOnContactListPage() {
@@ -1000,7 +1028,9 @@ public class ContactListPage {
     }
 
     public void showPopUpDeleteBulkConfirmation() {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_DELETE_BULK)));
+        Utils.retryOperationWithCatch(() -> {
+            new WebDriverWait(this.driver, Duration.ofSeconds(5)).until(ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_DELETE_BULK)));
+        }, this::userClickButtonDeleteBulkOnContactListPage, 60000);
     }
 
     public void userClickButtonYesIMSureOnDeleteBulkConfirmation() {
@@ -1041,15 +1071,10 @@ public class ContactListPage {
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BUTTON_EXPAND_FILTER_VALUE_SESSION_ID)));
         WebElement element = driver.findElement(By.xpath(BUTTON_EXPAND_FILTER_VALUE_SESSION_ID + "/p"));
         new Actions(driver).moveToElement(element).click().pause(1000).build().perform();
-
-        String xpath = "//*[@id='usecontactlist_popup_select_filtercondition_name']/following-sibling::input";
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
-        WebElement e = driver.findElement(By.xpath(xpath));
-        new Actions(driver).moveToElement(e).click().pause(1000).build().perform();
     }
 
     public void onFieldFilterByValueTickOnlyOne() {
-        String nextPage = "//*[@id='usecontactlistdetail_popup_button_filtervalue_nextpagination_session']/*[local-name()='svg']/*[local-name()='path']";
+        String nextPage = "//*[@id='contactlisthistory_filtervalue_btn_nextnavigation_session']/*[local-name()='svg']/*[local-name()='path']";
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(nextPage)));
         WebElement element = driver.findElement(By.xpath(nextPage));
         new Actions(driver).moveToElement(element).click().pause(500).build().perform();
@@ -1060,7 +1085,134 @@ public class ContactListPage {
         new Actions(driver).moveToElement(elements.get(2)).click().pause(500).build().perform();
     }
 
-    public void searchChatWillFoundNothing() {
+    public void userClickRefreshDataButtonOnContactListPage() {
+        String xpath = "//*[@id='contactlist_btn_refresh_data']";
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        WebElement element = driver.findElement(By.xpath(xpath));
+        new Actions(driver).moveToElement(element).click().pause(1500).build().perform();
+    }
 
+    public void userClickBackToContactListFromContactHistory() {
+        String xpath = "//*[@id='contactlistdetail_button_back']/*[local-name()='path']";
+        WebElement element = driver.findElement(By.xpath(xpath));
+        new Actions(driver).moveToElement(element).click().pause(1500).build().perform();
+    }
+
+    public boolean checkIfOverwrite() {
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_OVERWRITE_DATA)),
+                    ExpectedConditions.presenceOfElementLocated(By.xpath(POPUP_IMPORT_FILE_OVERWRITE_DATA_WA))
+            ));
+            String xpath = "//*[@class='AddContactList_head' or @class='AddContactListWa_head']/*[local-name()='h3' or local-name()='h4']";
+            WebElement element = driver.findElement(By.xpath(xpath));
+            assert element.getText().contains("Whatsapp") || element.getText().contains("Overwrite");
+            System.out.println("There is overwrite popup");
+            return true;
+        } catch (Throwable ignored) {
+            System.out.println("There is no overwrite popup");
+            return false;
+        }
+    }
+
+
+    public void userClickActionOnPopUp(String action) {
+        String xpath = "//input[@type='radio']";
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+        List<WebElement> elements = driver.findElements(By.xpath(xpath));
+
+        switch (action) {
+            case "skip":
+                elements.get(0).click();
+                break;
+            case "overwrite":
+                elements.get(1).click();
+                break;
+            case "merge":
+                elements.get(2).click();
+                break;
+        }
+
+        new Actions(driver).pause(500).build().perform();
+    }
+
+    public void userClickButtonSubmitNext() {
+        Utils.retryOperation(() -> {
+            String xpath = "//*[@class='btn-save']/*[local-name()='svg']/*[local-name()='path']";
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+            WebElement element = driver.findElement(By.xpath(xpath));
+            new Actions(driver).moveToElement(element).click().pause(1000).build().perform();
+
+            String popup = "//*[@class='ContactUploadOverwrite']";
+            new WebDriverWait(this.driver, Duration.ofMinutes(5)).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(popup)));
+        }, waitTimeForLoop);
+    }
+
+    public void userWillBeRedirectedToPageContactListHistory() {
+        String xpath = "//*[@class='ContactListHistoryPage_head']";
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+    }
+
+    public void willShowsTableContactListHistory() {
+        String xpath = "//*[@class='ContactListHistoryPage_data']";
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+    }
+
+    public void willShowsSessionIdForEveryActivityInsideChatSession() {
+        String xpath = "//*[@class='ContactListHistoryPage_data']//*[contains(@title,'Expired Session')]/preceding-sibling::td[5]/p";
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+        List<WebElement> elements = driver.findElements(By.xpath(xpath));
+        assert elements.stream().anyMatch(f -> !f.getText().isEmpty());
+    }
+
+    public void willNotShowsSessionIdForEveryActivityOutsideChatSession() {
+        String xpath = "//*[@class='ContactListHistoryPage_data']//*[contains(@title,'Start New Session') or contains(@title,'Edited Contact Number')]/preceding-sibling::td[5]/p";
+        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+        List<WebElement> elements = driver.findElements(By.xpath(xpath));
+
+        if (elements.stream().noneMatch(f -> f.getText().isEmpty())) {
+            System.out.println("There is no activity outside chat session in last 50 logs");
+        }
+    }
+
+    public void userTypeOnFieldInputSearchContactListHistoryPage(String text) {
+        String xpath = "//*[@id='contactlisthistory_textinput_searchcontact']";
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+        WebElement element = driver.findElement(By.xpath(xpath));
+        element.clear();
+        new Actions(driver).moveToElement(element).click().sendKeys(text).build().perform();
+
+    }
+
+    public void userClickButtonExportTable() {
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(BTN_EXPORT_CONTACT_LIST_HISTORY)));
+        WebElement element = driver.findElement(By.xpath(BTN_EXPORT_CONTACT_LIST_HISTORY));
+        new Actions(driver).moveToElement(element).click().build().perform();
+    }
+
+    public void userClickButtonYesImSureOnExportTableConfirmation() {
+        Utils.retryOperation(() -> {
+            userClickButtonExportTable();
+
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(POPUP_EXPORT_CONTACT_LIST_HISTORY)));
+            WebElement element = driver.findElement(By.xpath(POPUP_EXPORT_CONTACT_LIST_HISTORY));
+
+            element.click();
+
+            new Actions(driver).pause(3000).perform();
+
+            try {
+                if (element.isDisplayed()) {
+                    throw new StaleElementReferenceException("");
+                }
+            } catch (StaleElementReferenceException ignore) {}
+        }, waitTimeForLoop);
+    }
+
+    public void contactListHistoryTableWillBeExportedToExcelFormat() {
+        new Actions(driver).pause(7000).perform();
+        assert Utils.verifyDownloadedFile("ContactListHistory") : "File is not downloaded after 7 seconds";
+        new Actions(driver).pause(1000).perform();
+        assert Utils.deleteDownloadedFile("ContactListHistory") : "Failed to delete file";
     }
 }

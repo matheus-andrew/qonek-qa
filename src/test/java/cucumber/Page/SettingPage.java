@@ -1,6 +1,7 @@
 package cucumber.Page;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -23,7 +24,7 @@ public class SettingPage {
 
     public SettingPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(120));
+        this.wait = new WebDriverWait(this.driver, Duration.ofSeconds(30));
     }
 
     public void validateRedirectToAppInformation() {
@@ -78,8 +79,15 @@ public class SettingPage {
 
         int[] timer = {0, pending, 0, expired};
         for (int i = 0; i < 4; i++) {
-            newElements.get(i).clear();
-            newElements.get(i).sendKeys(String.valueOf(timer[i]));
+            new Actions(driver)
+                    .moveToElement(newElements.get(i))
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(String.valueOf(timer[i]))
+                    .build().perform();
         }
 
         clickMenuChatSettingButtonApplyEdit();
@@ -90,9 +98,15 @@ public class SettingPage {
 
         int[] timer = {hour, minute};
         for (int i = 0; i < 2; i++) {
-            elements.get(i).clear();
-            elements.get(i).sendKeys(String.valueOf(timer[i]));
-            new Actions(driver).pause(500).perform();
+            new Actions(driver)
+                    .moveToElement(elements.get(i))
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(String.valueOf(timer[i]))
+                    .build().perform();
         }
     }
 
@@ -101,9 +115,15 @@ public class SettingPage {
 
         int[] timer = {hour, minute};
         for (int i = 2; i < 4; i++) {
-            elements.get(i).clear();
-            elements.get(i).sendKeys(String.valueOf(timer[i - 2]));
-            new Actions(driver).pause(500).perform();
+            new Actions(driver)
+                    .moveToElement(elements.get(i))
+                    .click()
+                    .keyDown(Keys.CONTROL)
+                    .sendKeys("a")
+                    .keyUp(Keys.CONTROL)
+                    .pause(500)
+                    .sendKeys(String.valueOf(timer[i - 2]))
+                    .build().perform();
         }
     }
 

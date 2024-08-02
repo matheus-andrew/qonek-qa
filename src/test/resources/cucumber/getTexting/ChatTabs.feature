@@ -1,4 +1,4 @@
-@Feature
+@Feature @Feature-ChatTabs
 Feature: Get Texting - Chat Tabs
 
   @Scenario-27
@@ -16,11 +16,6 @@ Feature: Get Texting - Chat Tabs
   Scenario: Membuka Chat Tab yang telah dibuat sebelumnya
     Given User already login
     And User in inbox page
-    When User click button Add New Chat Tabs
-    And User click and type "Achmad Ongoing" on form Chat Tabs Name
-    And User tick session "OnGoing"
-    And User choose "qa-matt@gmail.com" on form User Name
-    And User click button 'Create Chat Tabs'
     And On Chat Tabs will added new tab "Achmad Ongoing"
     When User click tab "Achmad Ongoing"
     Then Chatroom on chatbox will be filtered and showed 'Chat Tab Results' with button 'Close'
